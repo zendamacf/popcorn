@@ -1,0 +1,19 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Popcorn Demo</title>
+  <meta name="description" content="Popcorn Demo">
+</head>
+
+<body>
+  <div id="seats"></div>
+  <button onclick="window.getSeats();">Get Seats</button>
+  <script src="dist/popcorn.min.js"></script>
+  <script>
+    window.showSeats('seats', 500, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "popcorn",
+  "version": "1.0.0",
+  "description": "Seat reservation",
+  "main": "index.js",
+  "author": "Zach Lang <zach.d.lang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "konva": "^6.0.0",
+    "webpack": "^4.43.0"
+  },
+  "scripts": {
+    "dev": "webpack --mode development --module-bind js=babel-loader",
+    "build": "webpack --mode production --module-bind js=babel-loader",
+    "watch": "yarn run build --watch",
+    "lint": "yarn eslint \"src/**/*.{js,ts}\""
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^7.0.0",
+    "webpack-cli": "^3.3.11"
+  }
+}
