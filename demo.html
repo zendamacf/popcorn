@@ -10,10 +10,55 @@
 
 <body>
   <div id="seats"></div>
-  <button onclick="window.getSeats();">Get Seats</button>
+  <button onclick="getSeats();">Get Seats</button>
+  <button onclick="refresh();">Reload</button>
   <script src="dist/popcorn.min.js"></script>
   <script>
-    window.showSeats('seats', 500, 1000);
+    var seats = [
+      {id: '1', available: true},
+      {id: '2', available: true},
+      {id: '3', available: false},
+      {id: '4', available: false},
+      {id: '5', available: false},
+      {id: '6', available: true},
+      {id: '7', available: false},
+      {id: '8', available: true},
+      {id: '9', available: false},
+      {id: '10', available: true},
+      {id: '11', available: true},
+      {id: '12', available: true},
+      {id: '13', available: false},
+      {id: '14', available: false},
+      {id: '15', available: true},
+      {id: '16', available: true},
+      {id: '17', available: true},
+      {id: '18', available: false},
+      {id: '19', available: false},
+      {id: '20', available: false},
+      {id: '21', available: false},
+      {id: '22', available: true},
+      {id: '23', available: true},
+      {id: '24', available: true},
+      {id: '25', available: true},
+      {id: '26', available: false},
+      {id: '27', available: false},
+    ]
+    var popcorn = new window.Popcorn({
+      elem: '#seats',
+      width: 1000,
+      height: 500,
+      rowWidth: 12,
+      maxSeats: 3,
+      seatList: seats,
+    });
+
+    function getSeats() {
+      alert(popcorn.selected);
+    }
+
+    function refresh() {
+      popcorn.redraw();
+    }
   </script>
 </body>
 </html>

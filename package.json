@@ -6,8 +6,7 @@
   "author": "Zach Lang <zach.d.lang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "konva": "^6.0.0",
-    "webpack": "^4.43.0"
+    "konva": "^6.0.0"
   },
   "scripts": {
     "dev": "webpack --mode development --module-bind js=babel-loader",
@@ -19,7 +18,9 @@
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
+    "babel-preset-minify": "^0.5.1",
     "eslint": "^7.0.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "webpack": "^4.43.0"
   }
 }

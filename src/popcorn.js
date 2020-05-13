@@ -1,53 +1,69 @@
-import { Stage, Layer } from 'konva';
+import { Stage, Layer, Text as KText } from 'konva';
 import Seat from './seat';
 import { SEAT_WIDTH, SEAT_MARGIN } from './layout';
 
-const seats = {
-  width: 12,
-  count: 53,
-};
+class Popcorn {
+  constructor(opts) {
+    this.stage = new Stage({
+      container: opts.elem,
+      width: opts.width,
+      height: opts.height,
+    });
 
-let stage;
+    const layer = new Layer();
 
-window.showSeats = function(elemId, height, width) {
-  stage = new Stage({
-    container: elemId,
-    width: width,
-    height: height,
-  });
+    let count = 0;
+    let xOffset = SEAT_WIDTH / 2;
+    let yOffset = SEAT_WIDTH / 2;
+    for (const s of opts.seatList) {
+      const seat = new Seat(
+        s.id,
+        xOffset,
+        yOffset,
+        s.available,
+      ).shape;
 
-  const layer = new Layer();
+      seat.on('click tap', (e) => {
+        const shape = e.target;
+        const seat = shape.getAttr('seat');
+        if (!seat.available) return;
+        const seats = this.stage.find('.selected');
 
-  let xOffset = SEAT_WIDTH / 2;
-  let yOffset = SEAT_WIDTH / 2;
-  for (let i = 0; i < seats.count; i++) {
-    const seat = new Seat(
-      i + 1,
-      xOffset,
-      yOffset,
-      (i % 13 === 0) ? false : true
-    ).shape;
+        if (!seat.selected && seats.length >= opts.maxSeats) {
+          alert(`You already have ${opts.maxSeats} seats selected.`);
+          return;
+        }
 
-    layer.add(seat);
+        seat.selected = !seat.selected;
+        shape.fill(seat.color());
+        shape.name(seat.name());
+        this.stage.draw();
+      });
 
-    if ((i + 1) % seats.width === 0) {
-      xOffset = SEAT_WIDTH / 2;
-      yOffset += SEAT_WIDTH + SEAT_MARGIN;
-    } else {
-      xOffset += SEAT_WIDTH + SEAT_MARGIN;
+      layer.add(seat);
+
+      count++;
+      if ((count) % opts.rowWidth === 0) {
+        xOffset = SEAT_WIDTH / 2;
+        yOffset += SEAT_WIDTH + SEAT_MARGIN;
+      } else {
+        xOffset += SEAT_WIDTH + SEAT_MARGIN;
+      }
     }
+
+    this.stage.add(layer);
+    layer.draw();
   }
 
-  stage.add(layer);
-  layer.draw();
-};
-
-window.getSeats = function() {
-  const seats = stage.find('.selected');
-  const selected = seats.map(seat => seat.id());
-  if (selected.length > 0) {
-    alert(`You have selected seats ${selected}`);
-  } else {
-    alert('You have no seats selected.');
+  redraw() {
+    this.stage.draw();
   }
-};
+
+  get selected() {
+    const seats = this.stage.find('.selected');
+    const selected = seats.map(seat => seat.id());
+    return selected;
+  }
+}
+
+window.Popcorn = Popcorn;

@@ -1,5 +1,5 @@
 import { Circle } from 'konva';
-import { SEAT_WIDTH, MAX_SEATS } from './layout';
+import { SEAT_WIDTH } from './layout';
 
 
 class Seat {
@@ -33,22 +33,6 @@ class Seat {
     });
 
     circle
-      .on('click tap', (e) => {
-        if (!this.available) return;
-        const seat = e.target;
-        const stage = seat.getStage();
-        const seats = stage.find('.selected');
-
-        if (!this.selected && seats.length >= MAX_SEATS) {
-          alert(`You already have ${MAX_SEATS} seats selected.`);
-          return;
-        }
-
-        this.selected = !this.selected;
-        seat.fill(this.color());
-        seat.name(this.name());
-        stage.draw();
-      })
       .on('mouseenter', (e) => {
         const container = e.target.getStage().container();
         if (!this.available) {
@@ -60,7 +44,8 @@ class Seat {
       .on('mouseleave', (e) => {
         const container = e.target.getStage().container();
         container.style.cursor = '';
-      });
+      })
+      .setAttr('seat', this);
     return circle;
   }
 }
