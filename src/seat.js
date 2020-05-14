@@ -1,52 +1,84 @@
 import { Circle } from 'konva';
-import { SEAT_WIDTH } from './layout';
 
 
 class Seat {
-  constructor(id, x, y, available) {
-    this.id = id;
-    this.x = x;
-    this.y = y;
-    this.available = available;
-    this.selected = false;
-  }
+  constructor(opts) {
+    this.id = opts.id;
+    this.x = opts.x;
+    this.y = opts.y;
+    this.booked = opts.booked;
+    this.available = opts.available;
+    this.isSelected = false;
+    this.opts = opts;
 
-  color() {
-    if (this.selected) return 'red';
-    if (!this.available) return 'lightgrey';
-    return '#1b728d';
-  }
-
-  name() {
-    if (this.selected) return 'selected';
-    return 'unselected';
-  }
-
-  get shape() {
-    const circle = new Circle({
+    this.seatShape = new Circle({
       id: this.id,
       x: this.x,
       y: this.y,
       name: this.name(),
-      radius: SEAT_WIDTH / 2,
+      radius: opts.seatWidth / 2,
       fill: this.color(),
     });
-
-    circle
+    this.seatShape
       .on('mouseenter', (e) => {
         const container = e.target.getStage().container();
-        if (!this.available) {
-          container.style.cursor = 'not-allowed';
-        } else {
-          container.style.cursor = 'pointer';
-        }
+        if (this.booked || !this.available) container.style.cursor = 'not-allowed';
+        else container.style.cursor = 'pointer';
       })
       .on('mouseleave', (e) => {
         const container = e.target.getStage().container();
         container.style.cursor = '';
       })
       .setAttr('seat', this);
-    return circle;
+  }
+
+  /**
+   * The color to fill this seat with.
+   */
+  color() {
+    if (this.isSelected) return this.opts.selectedColor;
+    if (this.booked) return this.opts.bookedColor;
+    if (!this.available) return this.opts.unavailableColor;
+    return this.opts.availableColor;
+  }
+
+  /**
+   * The name for this seat, used for finding selected seats from
+   * the Konva Stage object.
+   */
+  name() {
+    if (this.isSelected) return 'selected';
+    return 'unselected';
+  }
+
+  /**
+   * Select this seat.
+   */
+  select() {
+    if (this.booked || !this.available) return;
+
+    this.isSelected = true;
+    this.change();
+  }
+
+  /**
+   * Deselect this seat.
+   */
+  deselect() {
+    this.isSelected = false;
+    this.change();
+  }
+
+  change() {
+    this.seatShape.fill(this.color());
+    this.seatShape.name(this.name());
+  }
+
+  /**
+   * Get the Konva shape object representing this seat.
+   */
+  get shape() {
+    return this.seatShape;
   }
 }
 

@@ -11,37 +11,71 @@
 <body>
   <div id="seats"></div>
   <button onclick="getSeats();">Get Seats</button>
+  <button onclick="setSeats();">Randomise</button>
   <button onclick="refresh();">Reload</button>
   <script src="dist/popcorn.min.js"></script>
   <script>
     var seats = [
-      {id: '1', available: true},
-      {id: '2', available: true},
-      {id: '3', available: false},
-      {id: '4', available: false},
-      {id: '5', available: false},
-      {id: '6', available: true},
-      {id: '7', available: false},
-      {id: '8', available: true},
-      {id: '9', available: false},
-      {id: '10', available: true},
-      {id: '11', available: true},
-      {id: '12', available: true},
-      {id: '13', available: false},
-      {id: '14', available: false},
-      {id: '15', available: true},
-      {id: '16', available: true},
-      {id: '17', available: true},
-      {id: '18', available: false},
-      {id: '19', available: false},
-      {id: '20', available: false},
-      {id: '21', available: false},
-      {id: '22', available: true},
-      {id: '23', available: true},
-      {id: '24', available: true},
-      {id: '25', available: true},
-      {id: '26', available: false},
-      {id: '27', available: false},
+      {id: 'A1', available: true, booked: true},
+      {id: 'A2', available: false, booked: false},
+      {id: 'A3', available: true, booked: true},
+      {id: 'A4', available: false, booked: false},
+      {id: 'A5', available: true, booked: false},
+      {id: 'A6', available: false, booked: false},
+      {id: 'A7', available: true, booked: false},
+      {id: 'A8', available: false, booked: false},
+      {id: 'A9', available: true, booked: false},
+      {id: 'A10', available: false, booked: false},
+      {id: 'A11', available: true, booked: false},
+      {id: 'A12', available: false, booked: false},
+      {id: 'B1', available: false, booked: false},
+      {id: 'B2', available: true, booked: true},
+      {id: 'B3', available: false, booked: false},
+      {id: 'B4', available: true, booked: true},
+      {id: 'B5', available: false, booked: false},
+      {id: 'B6', available: true, booked: true},
+      {id: 'B7', available: false, booked: false},
+      {id: 'B8', available: true, booked: false},
+      {id: 'B9', available: false, booked: false},
+      {id: 'B10', available: true, booked: false},
+      {id: 'B11', available: false, booked: false},
+      {id: 'B12', available: true, booked: false},
+      {id: 'C1', available: true, booked: false},
+      {id: 'C2', available: false, booked: false},
+      {id: 'C3', available: true, booked: false},
+      {id: 'C4', available: false, booked: false},
+      {id: 'C5', available: true, booked: false},
+      {id: 'C6', available: false, booked: false},
+      {id: 'C7', available: true, booked: false},
+      {id: 'C8', available: false, booked: false},
+      {id: 'C9', available: true, booked: false},
+      {id: 'C10', available: false, booked: false},
+      {id: 'C11', available: true, booked: false},
+      {id: 'C12', available: false, booked: false},
+      {id: 'D1', available: false, booked: false},
+      {id: 'D2', available: true, booked: false},
+      {id: 'D3', available: false, booked: false},
+      {id: 'D4', available: true, booked: false},
+      {id: 'D5', available: false, booked: false},
+      {id: 'D6', available: true, booked: false},
+      {id: 'D7', available: false, booked: false},
+      {id: 'D8', available: true, booked: true},
+      {id: 'D9', available: false, booked: false},
+      {id: 'D10', available: true, booked: true},
+      {id: 'D11', available: false, booked: false},
+      {id: 'D12', available: true, booked: false},
+      {id: 'E1', available: true, booked: false},
+      {id: 'E2', available: false, booked: false},
+      {id: 'E3', available: true, booked: false},
+      {id: 'E4', available: false, booked: false},
+      {id: 'E5', available: true, booked: true},
+      {id: 'E6', available: false, booked: false},
+      {id: 'E7', available: true, booked: false},
+      {id: 'E8', available: false, booked: false},
+      {id: 'E9', available: true, booked: false},
+      {id: 'E10', available: false, booked: false},
+      {id: 'E11', available: true, booked: false},
+      {id: 'E12', available: false, booked: false},
     ]
     var popcorn = new window.Popcorn({
       elem: '#seats',
@@ -54,6 +88,21 @@
 
     function getSeats() {
       alert(popcorn.selected);
+    }
+
+    function randomAvailableSeat() {
+      var available = seats.filter(seat => seat.available);
+      var index = Math.floor(Math.random() * Math.floor(available.length));
+      return available[index];
+    }
+
+    function setSeats() {
+      var seats = [];
+      while (seats.length < 3) {
+        var seat = randomAvailableSeat().id;
+        if (!seats.includes(seat)) seats.push(randomAvailableSeat().id);
+      }
+      popcorn.selected = seats;
     }
 
     function refresh() {
