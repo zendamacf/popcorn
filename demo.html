@@ -13,6 +13,7 @@
   <button onclick="getSeats();">Get Seats</button>
   <button onclick="setSeats();">Randomise</button>
   <button onclick="refresh();">Reload</button>
+  <button onclick="remove();">Destroy</button>
   <script src="dist/popcorn.min.js"></script>
   <script>
     var seats = [
@@ -83,6 +84,7 @@
       height: 500,
       rowWidth: 12,
       maxSeats: 3,
+      backgroundColor: 'grey',
       seatList: seats,
     });
 
@@ -107,6 +109,10 @@
 
     function refresh() {
       popcorn.redraw();
+    }
+
+    function remove() {
+      popcorn.destroy();
     }
   </script>
 </body>
