@@ -1,5 +1,6 @@
 import { Stage, Layer, Rect, Text as KText } from 'konva';
-import Seat from './seat';
+import EventSeat from './eventSeat';
+import Legend from './legend';
 import { DEFAULTS } from './defaults';
 import { rowLabel, cloneArray, multiArray, centerKonvaNode } from './utils';
 
@@ -25,6 +26,7 @@ class Popcorn {
     if (this.opts.backgroundColor) this._populateBackground();
     this._populateFrontLabel();
     this._populateLayout();
+    this._populateLegend();
     this.stage.draw();
   }
 
@@ -98,6 +100,11 @@ class Popcorn {
     this.stage.add(layer);
   }
 
+  _populateLegend() {
+    const legend = new Legend(this.opts);
+    this.stage.add(legend);
+  }
+
   /**
    * Create a Seat object.
    * @param {Object} s An object with seat details.
@@ -105,7 +112,7 @@ class Popcorn {
    * @param {number} yOffset The Y offset in pixels.
    */
   _buildSeat(s, xOffset, yOffset) {
-    const seat = new Seat(
+    const seat = new EventSeat(
       Object.assign(
         {
           id: s.id,

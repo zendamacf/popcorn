@@ -1,7 +1,9 @@
-import { Circle, Group, Line } from 'konva';
+import AvailableSeat from './shapes/availableSeat';
+import UnavailableSeat from './shapes/unavailableSeat';
+import BookedSeat from './shapes/bookedSeat';
 
 
-class Seat {
+class EventSeat {
   constructor(opts) {
     this.id = opts.id;
     this.x = opts.x;
@@ -11,40 +13,31 @@ class Seat {
     this.isSelected = false;
     this.opts = opts;
 
-    this.seatShape = new Group({
-      id: this.id,
-      x: this.x,
-      y: this.y,
-      name: this.name(),
-    });
+    const shape = this._shapeClass();
 
-    this._populateGroup();
+    this.seatShape = new shape(
+      Object.assign(
+        {
+          id: this.id,
+          x: this.x,
+          y: this.y,
+          name: this.name(),
+        },
+        this.opts
+      )
+    );
+
+    this._bindEvents();
   }
 
-  _populateGroup() {
-    const radius = this.opts.seatWidth / 2;
+  _shapeClass() {
+    // if (this.isSelected) return this.opts.selectedColor;
+    if (this.booked) return BookedSeat;
+    if (!this.available) return UnavailableSeat;
+    return AvailableSeat;
+  }
 
-    const circle = new Circle({
-      radius: radius,
-      fill: this.color(),
-    });
-    this.seatShape.add(circle);
-
-    if (!this.available) {
-      const lineEnd = radius / 2;
-      const line1 = new Line({
-        points: [-lineEnd, -lineEnd, 0, 0, lineEnd, lineEnd],
-        stroke: 'black',
-      });
-      const line2 = new Line({
-        points: [-lineEnd, lineEnd, 0, 0, lineEnd, -lineEnd],
-        stroke: 'black',
-      });
-      this.seatShape
-        .add(line1)
-        .add(line2);
-    }
-
+  _bindEvents() {
     this.seatShape
       .on('mouseenter', (e) => {
         const container = e.target.getStage().container();
@@ -107,4 +100,4 @@ class Seat {
   }
 }
 
-export default Seat;
+export default EventSeat;
