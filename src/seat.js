@@ -1,4 +1,4 @@
-import { Circle } from 'konva';
+import { Circle, Group, Line } from 'konva';
 
 
 class Seat {
@@ -11,14 +11,40 @@ class Seat {
     this.isSelected = false;
     this.opts = opts;
 
-    this.seatShape = new Circle({
+    this.seatShape = new Group({
       id: this.id,
       x: this.x,
       y: this.y,
       name: this.name(),
-      radius: opts.seatWidth / 2,
+    });
+
+    this._populateGroup();
+  }
+
+  _populateGroup() {
+    const radius = this.opts.seatWidth / 2;
+
+    const circle = new Circle({
+      radius: radius,
       fill: this.color(),
     });
+    this.seatShape.add(circle);
+
+    if (!this.available) {
+      const lineEnd = radius / 2;
+      const line1 = new Line({
+        points: [-lineEnd, -lineEnd, 0, 0, lineEnd, lineEnd],
+        stroke: 'black',
+      });
+      const line2 = new Line({
+        points: [-lineEnd, lineEnd, 0, 0, lineEnd, -lineEnd],
+        stroke: 'black',
+      });
+      this.seatShape
+        .add(line1)
+        .add(line2);
+    }
+
     this.seatShape
       .on('mouseenter', (e) => {
         const container = e.target.getStage().container();
@@ -38,8 +64,7 @@ class Seat {
   color() {
     if (this.isSelected) return this.opts.selectedColor;
     if (this.booked) return this.opts.bookedColor;
-    if (!this.available) return this.opts.unavailableColor;
-    return this.opts.availableColor;
+    return this.opts.seatColor;
   }
 
   /**
@@ -70,7 +95,7 @@ class Seat {
   }
 
   change() {
-    this.seatShape.fill(this.color());
+    this.seatShape.find('Circle').fill(this.color());
     this.seatShape.name(this.name());
   }
 

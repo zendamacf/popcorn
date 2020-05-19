@@ -119,7 +119,8 @@ class Popcorn {
     ).shape;
 
     seat.on('click tap', (e) => {
-      const shape = e.target;
+      // Click seems to happen on the circle, so get the group
+      const shape = e.target.findAncestor('Group');
       const seat = shape.getAttr('seat');
       const seats = this.stage.find('.selected');
       if (seat.booked || !seat.available) return;

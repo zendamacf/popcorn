@@ -1,8 +1,6 @@
 export const DEFAULTS = {
-  // Fill color for available seats
-  availableColor: '#1B728D',
-  // Fill color for unavailable seats
-  unavailableColor: 'lightgrey',
+  // Fill color for seats
+  seatColor: 'lightgrey',
   // Fill color for booked seats
   bookedColor: 'red',
   // Fill color for selected seats
