@@ -8,8 +8,8 @@ class EventSeat {
     this.id = opts.id;
     this.x = opts.x;
     this.y = opts.y;
-    this.booked = opts.booked;
-    this.available = opts.available;
+    this.booked = opts.booked || false;
+    this.unavailable = opts.unavailable || false;
     this.isSelected = false;
     this.opts = opts;
 
@@ -33,7 +33,7 @@ class EventSeat {
   _shapeClass() {
     // if (this.isSelected) return this.opts.selectedColor;
     if (this.booked) return BookedSeat;
-    if (!this.available) return UnavailableSeat;
+    if (this.unavailable) return UnavailableSeat;
     return AvailableSeat;
   }
 
@@ -41,7 +41,7 @@ class EventSeat {
     this.seatShape
       .on('mouseenter', (e) => {
         const container = e.target.getStage().container();
-        if (this.booked || !this.available) container.style.cursor = 'not-allowed';
+        if (this.booked || this.unavailable) container.style.cursor = 'not-allowed';
         else container.style.cursor = 'pointer';
       })
       .on('mouseleave', (e) => {
@@ -73,7 +73,7 @@ class EventSeat {
    * Select this seat.
    */
   select() {
-    if (this.booked || !this.available) return;
+    if (this.booked || this.unavailable) return;
 
     this.isSelected = true;
     this.change();

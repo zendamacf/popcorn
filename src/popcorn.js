@@ -119,7 +119,7 @@ class Popcorn {
           id: s.id,
           x: xOffset,
           y: yOffset,
-          available: s.available,
+          unavailable: s.unavailable,
           booked: s.booked,
         },
         this.opts
@@ -131,7 +131,7 @@ class Popcorn {
       const shape = e.target.findAncestor('Group');
       const seat = shape.getAttr('seat');
       const seats = this.stage.find('.selected');
-      if (seat.booked || !seat.available) return;
+      if (seat.booked || seat.unavailable) return;
 
       if (!seat.isSelected && seats.length >= this.opts.maxSeats) {
         alert(`You already have ${this.opts.maxSeats} seats selected.`);
