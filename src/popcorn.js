@@ -77,7 +77,7 @@ class Popcorn {
 
     const rect = new Rect({
       y: 10,
-      stroke: '#000',
+      stroke: this.opts.textColor,
       width: this.stage.width() / 2,
       height: 40,
     });
@@ -89,6 +89,7 @@ class Popcorn {
       fontSize: 20,
       fontStyle: 'bold',
       verticalAlign: 'middle',
+      fill: this.opts.textColor,
       text: 'FRONT',
     });
     // Center in the middle of the canvas once we know the width
@@ -157,6 +158,7 @@ class Popcorn {
       fontSize: this.opts.seatWidth * 0.6,
       fontStyle: 'bold',
       verticalAlign: 'middle',
+      fill: this.opts.textColor,
       text: rowLabel(rowNumber),
     });
 

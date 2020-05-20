@@ -4,7 +4,7 @@ import Seat from './seat';
 
 class UnavailableSeat {
   constructor(opts) {
-    const group = new Seat(opts.seatColor, opts);
+    const group = new Seat(opts.unavailableColor, opts);
 
     const radius = opts.seatWidth / 2;
 

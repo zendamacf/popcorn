@@ -35,6 +35,7 @@ class Legend {
     const label = new KText({
       x: this.seatWidth,
       y: this.yOffset,
+      fill: this.opts.textColor,
       text: 'Available',
     });
 
@@ -57,6 +58,7 @@ class Legend {
     const label = new KText({
       x: this.seatWidth,
       y: this.yOffset + this.seatWidth,
+      fill: this.opts.textColor,
       text: 'Unavailable',
     });
 
@@ -79,6 +81,7 @@ class Legend {
     const label = new KText({
       x: this.seatWidth,
       y: this.yOffset + this.seatWidth * 2,
+      fill: this.opts.textColor,
       text: 'Booked',
     });
 
@@ -101,6 +104,7 @@ class Legend {
     const label = new KText({
       x: this.seatWidth,
       y: this.yOffset + this.seatWidth * 3,
+      fill: this.opts.textColor,
       text: 'Selected',
     });
 

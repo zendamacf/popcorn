@@ -1,6 +1,10 @@
 export const DEFAULTS = {
+  // Color for all text
+  textColor: 'black',
   // Fill color for seats
   seatColor: 'lightgrey',
+  // Fill color for unavailble seats
+  unavailableColor: 'lightgrey',
   // Fill color for booked seats
   bookedColor: 'red',
   // Fill color for selected seats
