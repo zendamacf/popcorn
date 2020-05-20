@@ -26,7 +26,7 @@ class Popcorn {
     if (this.opts.backgroundColor) this._populateBackground();
     this._populateFrontLabel();
     this._populateLayout();
-    this._populateLegend();
+    this._populateLegend(layoutWidth);
     this.stage.draw();
   }
 
@@ -101,9 +101,13 @@ class Popcorn {
     this.stage.add(layer);
   }
 
-  _populateLegend() {
-    const legend = new Legend(this.opts);
-    this.stage.add(legend);
+  _populateLegend(layoutWidth) {
+    const legend = new Legend(layoutWidth, this.opts);
+    centerKonvaNode(legend, this.stage);
+
+    const layer = new Layer();
+    layer.add(legend);
+    this.stage.add(layer);
   }
 
   /**

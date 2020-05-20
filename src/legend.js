@@ -1,4 +1,4 @@
-import { Layer, Text as KText } from 'konva';
+import { Group, Text as KText } from 'konva';
 import AvailableSeat from './shapes/availableSeat';
 import UnavailableSeat from './shapes/unavailableSeat';
 import BookedSeat from './shapes/bookedSeat';
@@ -6,109 +6,70 @@ import SelectedSeat from './shapes/selectedSeat';
 
 
 class Legend {
-  constructor(opts) {
+  constructor(maxWidth, opts) {
     this.opts = opts;
-    this.seatWidth = this.opts.seatWidth + this.opts.seatMargin;
-    this.xOffset = 20;
-    this.yOffset = 20;
-    this.layer = new Layer();
+    // The default text size is 12, so offset by 6 to align
+    // with center of circles
+    this.halfText = 6;
+    this.width = maxWidth;
+    // Spread out entries across the legend
+    this.entryWidth = this.width / 4;
+    this.entryPadding = this.entryWidth / 4;
+    this.seatWidth = this.opts.seatWidth / 2 + this.opts.seatMargin;
+
+    console.log(this.width);
+
+    this.group = new Group({
+      x: 20,
+      y: this.opts.height - 40,
+      width: this.width,
+    });
 
     this._populateAvailable();
     this._populateUnavailable();
     this._populateBooked();
     this._populateSelected();
 
-    return this.layer;
+    return this.group;
   }
 
   _populateAvailable() {
-    const seat = new AvailableSeat(
-      Object.assign(
-        {
-          x: this.xOffset,
-          y: this.yOffset,
-        },
-        this.opts
-      )
-    );
-
-    const label = new KText({
-      x: this.seatWidth,
-      y: this.yOffset,
-      fill: this.opts.textColor,
-      text: 'Available',
-    });
-
-    this.layer
-      .add(seat)
-      .add(label);
+    this._populateEntry(AvailableSeat, 'Available', 0);
   }
 
   _populateUnavailable() {
-    const seat = new UnavailableSeat(
-      Object.assign(
-        {
-          x: this.xOffset,
-          y: this.yOffset + this.seatWidth,
-        },
-        this.opts
-      )
-    );
-
-    const label = new KText({
-      x: this.seatWidth,
-      y: this.yOffset + this.seatWidth,
-      fill: this.opts.textColor,
-      text: 'Unavailable',
-    });
-
-    this.layer
-      .add(seat)
-      .add(label);
+    this._populateEntry(UnavailableSeat, 'Unavailable', 1);
   }
 
   _populateBooked() {
-    const seat = new BookedSeat(
-      Object.assign(
-        {
-          x: this.xOffset,
-          y: this.yOffset + this.seatWidth * 2,
-        },
-        this.opts
-      )
-    );
-
-    const label = new KText({
-      x: this.seatWidth,
-      y: this.yOffset + this.seatWidth * 2,
-      fill: this.opts.textColor,
-      text: 'Booked',
-    });
-
-    this.layer
-      .add(seat)
-      .add(label);
+    this._populateEntry(BookedSeat, 'Booked', 2);
   }
 
   _populateSelected() {
-    const seat = new SelectedSeat(
+    this._populateEntry(SelectedSeat, 'Selected', 3);
+  }
+
+  _populateEntry(entryClass, labelText, index) {
+    // Figure out starting x for this entry
+    const xStart = this.entryWidth * index;
+
+    const seat = new entryClass(
       Object.assign(
-        {
-          x: this.xOffset,
-          y: this.yOffset + this.seatWidth * 3,
-        },
+        {x: xStart + this.entryPadding},
         this.opts
       )
     );
-
+    console.log(seat.width());
+    
     const label = new KText({
-      x: this.seatWidth,
-      y: this.yOffset + this.seatWidth * 3,
+      x: xStart + this.seatWidth + this.entryPadding,
+      y: -this.halfText,
       fill: this.opts.textColor,
-      text: 'Selected',
+      text: labelText,
     });
-
-    this.layer
+    console.log(label.width());
+    
+    this.group
       .add(seat)
       .add(label);
   }
