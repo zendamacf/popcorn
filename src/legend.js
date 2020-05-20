@@ -17,8 +17,6 @@ class Legend {
     this.entryPadding = this.entryWidth / 4;
     this.seatWidth = this.opts.seatWidth / 2 + this.opts.seatMargin;
 
-    console.log(this.width);
-
     this.group = new Group({
       x: 20,
       y: this.opts.height - 40,
@@ -59,7 +57,6 @@ class Legend {
         this.opts
       )
     );
-    console.log(seat.width());
     
     const label = new KText({
       x: xStart + this.seatWidth + this.entryPadding,
@@ -67,7 +64,6 @@ class Legend {
       fill: this.opts.textColor,
       text: labelText,
     });
-    console.log(label.width());
     
     this.group
       .add(seat)
