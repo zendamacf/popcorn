@@ -64,8 +64,11 @@ class Popcorn {
       layer.add(label);
 
       for (const [colIndex, col] of row.entries()) {
-        const seat = this._buildSeat(col, startX + this.seatWidth * colIndex, yOffset);
-        layer.add(seat);
+        // If id is not provided, leave an empty space
+        if (col.id) {
+          const seat = this._buildSeat(col, startX + this.seatWidth * colIndex, yOffset);
+          layer.add(seat);
+        }
       }
     }
 
