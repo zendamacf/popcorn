@@ -10,17 +10,20 @@ class Popcorn {
     this.opts = Object.assign(DEFAULTS, options || {});
     if (!this.opts.seatList) throw 'No seatlist provided.';
 
-    this.opts.seatList = cloneArray(this.opts.seatList);
+    this.elem = document.querySelector(this.opts.elem);
+    if (this.elem === null) throw 'Element not found.';
+
+    this.layout = cloneArray(this.opts.seatList);
 
     this.stage = new Stage({
-      container: this.opts.elem,
+      container: this.elem,
       width: this.opts.width,
       height: this.opts.height,
     });
 
     this.seatWidth = this.opts.seatWidth + this.opts.seatMargin;
     // Center the seats in the middle of the canvas
-    const layoutWidth = Math.min(this.opts.seatList.length, this.opts.rowWidth) * this.seatWidth + this.opts.rowLabelWidth;
+    const layoutWidth = Math.min(this.layout.length, this.opts.rowWidth) * this.seatWidth + this.opts.rowLabelWidth;
     this.centeringOffset = (this.opts.width - layoutWidth) / 2;
 
     if (this.opts.backgroundColor) this._populateBackground();
@@ -57,7 +60,7 @@ class Popcorn {
     // 60 pixels is to offset the front label
     const startY = 80 + this.opts.seatWidth / 2;
 
-    const seatList = multiArray(this.opts.seatList, this.opts.rowWidth);
+    const seatList = multiArray(this.layout, this.opts.rowWidth);
     for (const [rowIndex, row] of seatList.entries()) {
       const yOffset = startY + this.seatWidth * rowIndex;
       const label = this._buildRowLabel(rowIndex + 1, yOffset);
@@ -137,20 +140,31 @@ class Popcorn {
       // Click seems to happen on the circle, so get the group
       const shape = e.target.findAncestor('Group');
       const seat = shape.getAttr('seat');
-      const seats = this.stage.find('.selected');
+      const seats = this._getSelected();
       if (seat.booked || seat.unavailable) return;
 
       if (!seat.isSelected && seats.length >= this.opts.maxSeats) {
-        alert(`You already have ${this.opts.maxSeats} seats selected.`);
+        this._trigger('popcorn.maxseats', {total: seats.length});
         return;
       }
 
-      if (seat.isSelected) seat.deselect();
-      else seat.select();
+      // Alter the count, as it's taken before changing the state
+      if (seat.isSelected) {
+        seat.deselect();
+        this._trigger('popcorn.deselectseat', {seatid: seat.id, total: seats.length - 1});
+      } else {
+        seat.select();
+        this._trigger('popcorn.selectseat', {seatid: seat.id, total: seats.length + 1});
+      }
       this.redraw();
+
     });
 
     return seat;
+  }
+
+  _getSelected() {
+    return this.stage.find('.selected');
   }
 
   /**
@@ -173,6 +187,34 @@ class Popcorn {
   }
 
   /**
+   * Trigger a custom event.
+   * @param {string} eventName Name of the event.
+   * @param {Object} eventData An object with any associated data.
+   */
+  _trigger(eventName, eventData) {
+    const detail = eventData || {};
+    const event = new CustomEvent(
+      eventName,
+      {
+        detail: detail
+      }
+    );
+    this.elem.dispatchEvent(event);
+  }
+
+  /**
+   * Register an event handler.
+   * @param {string} eventName Name of the event.
+   * @param {function} eventHandler A callback function.
+   */
+  on(eventName, eventHandler) {
+    this.elem.addEventListener(
+      eventName,
+      eventHandler
+    );
+  }
+
+  /**
    * Redraw the canvas.
    */
   redraw() {
@@ -190,7 +232,7 @@ class Popcorn {
    * Get the selected seats.
    */
   get selected() {
-    const seats = this.stage.find('.selected');
+    const seats = this._getSelected();
     const selected = seats.map(seat => seat.id());
     return selected;
   }
@@ -199,7 +241,7 @@ class Popcorn {
    * Set the selected seats.
    */
   set selected(seats) {
-    this.stage.find('.selected').each((shape) => {
+    this._getSelected().each((shape) => {
       const seat = shape.getAttr('seat');
 
       seat.deselect();

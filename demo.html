@@ -129,6 +129,10 @@
     function remove() {
       popcorn.destroy();
     }
+
+    popcorn.on('popcorn.selectseat', function(e) { console.log('SELECTING SEAT', e.detail) });
+    popcorn.on('popcorn.deselectseat', function(e) { console.log('DESELECTING SEAT', e.detail) });
+    popcorn.on('popcorn.maxseats', function(e) { console.log('MAX LIMIT', e.detail) });
   </script>
 </body>
 </html>
