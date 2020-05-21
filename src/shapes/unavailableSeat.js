@@ -1,4 +1,4 @@
-import { Line } from 'konva';
+import { Line } from 'konva/lib/shapes/Line';
 import Seat from './seat';
 
 

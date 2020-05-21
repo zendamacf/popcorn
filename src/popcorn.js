@@ -1,4 +1,7 @@
-import { Stage, Layer, Rect, Text as KText } from 'konva';
+import { Stage } from 'konva/lib/Stage';
+import { Layer } from 'konva/lib/Layer';
+import { Rect } from 'konva/lib/shapes/Rect';
+import { Text as KText } from 'konva/lib/shapes/Text';
 import EventSeat from './eventSeat';
 import Legend from './legend';
 import { DEFAULTS } from './defaults';

@@ -1,4 +1,5 @@
-import { Circle, Group } from 'konva';
+import { Circle } from 'konva/lib/shapes/Circle';
+import { Group } from 'konva/lib/Group';
 
 
 class Seat {

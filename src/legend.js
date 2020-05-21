@@ -1,4 +1,5 @@
-import { Group, Text as KText } from 'konva';
+import { Group } from 'konva/lib/Group';
+import { Text as KText } from 'konva/lib/shapes/Text';
 import AvailableSeat from './shapes/availableSeat';
 import UnavailableSeat from './shapes/unavailableSeat';
 import BookedSeat from './shapes/bookedSeat';
