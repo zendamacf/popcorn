@@ -5,7 +5,7 @@ import Seat from './seat';
 class UnavailableSeat {
   constructor(opts) {
     const group = new Seat(opts.seatColor, opts);
-    group.find('Circle').opacity(0.2);
+    group.find('Circle').opacity(0.4);
 
     const radius = opts.seatWidth / 2;
 
