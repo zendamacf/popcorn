@@ -34,7 +34,7 @@ const popcorn = new window.Popcorn({
 popcorn.on(eventName, callbackFunction);
 ```
 
-The callback function will receive an event object with the `details` property populated with relevant data.
+The callback function will receive an event object with the `detail` property populated with relevant data.
 
 There are 3 types of events available:
 
