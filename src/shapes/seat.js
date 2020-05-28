@@ -9,10 +9,12 @@ class Seat {
       x: opts.x,
       y: opts.y,
       name: opts.name,
+      preventDefault: false,
     });
 
     const radius = opts.seatWidth / 2;
 
+    // Don't preventDefault here, as we actually need events on this
     const circle = new Circle({
       radius: radius,
       fill: fillColor,

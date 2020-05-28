@@ -22,6 +22,7 @@ class Popcorn {
       container: this.elem,
       width: this.opts.width,
       height: this.opts.height,
+      preventDefault: false,
     });
 
     this.seatWidth = this.opts.seatWidth + this.opts.seatMargin;
@@ -40,7 +41,9 @@ class Popcorn {
    * Create a full sized background layer.
    */
   _populateBackground() {
-    const backLayer = new Layer();
+    const backLayer = new Layer({
+      preventDefault: false,
+    });
 
     const rect = new Rect({
       x: 0,
@@ -48,6 +51,7 @@ class Popcorn {
       width: this.opts.width,
       height: this.opts.height,
       fill: this.opts.backgroundColor,
+      preventDefault: false,
     });
     backLayer.add(rect);
     this.stage.add(backLayer);
@@ -57,7 +61,9 @@ class Popcorn {
    * Populate the Stage with the seat layout.
    */
   _populateLayout() {
-    const layer = new Layer();
+    const layer = new Layer({
+      preventDefault: false,
+    });
 
     const startX = this.centeringOffset + this.opts.rowLabelWidth + this.opts.seatWidth / 2;
     // 60 pixels is to offset the front label
@@ -82,13 +88,16 @@ class Popcorn {
   }
 
   _populateFrontLabel() {
-    const layer = new Layer();
+    const layer = new Layer({
+      preventDefault: false,
+    });
 
     const rect = new Rect({
       y: 10,
       stroke: this.opts.textColor,
       width: this.stage.width() / 2,
       height: 40,
+      preventDefault: false,
     });
     centerKonvaNode(rect, this.stage);
     layer.add(rect);
@@ -100,6 +109,7 @@ class Popcorn {
       verticalAlign: 'middle',
       fill: this.opts.textColor,
       text: 'FRONT',
+      preventDefault: false,
     });
     // Center in the middle of the canvas once we know the width
     // of the label itelf
@@ -114,7 +124,9 @@ class Popcorn {
     const legend = new Legend(layoutWidth, this.opts);
     centerKonvaNode(legend, this.stage);
 
-    const layer = new Layer();
+    const layer = new Layer({
+      preventDefault: false,
+    });
     layer.add(legend);
     this.stage.add(layer);
   }
@@ -184,6 +196,7 @@ class Popcorn {
       verticalAlign: 'middle',
       fill: this.opts.textColor,
       text: rowLabel(rowNumber),
+      preventDefault: false,
     });
 
     return label;

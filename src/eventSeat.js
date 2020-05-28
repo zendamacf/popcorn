@@ -22,6 +22,7 @@ class EventSeat {
           x: this.x,
           y: this.y,
           name: this.name(),
+          preventDefault: false,
         },
         this.opts
       )

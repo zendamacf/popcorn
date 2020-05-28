@@ -22,6 +22,7 @@ class Legend {
       x: 20,
       y: this.opts.height - 40,
       width: this.width,
+      preventDefault: false,
     });
 
     this._populateAvailable();
@@ -64,6 +65,7 @@ class Legend {
       y: -this.halfText,
       fill: this.opts.textColor,
       text: labelText,
+      preventDefault: false,
     });
     
     this.group
