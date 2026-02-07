@@ -20,7 +20,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-minify": "^0.5.1",
     "eslint": "^7.0.0",
-    "webpack": "^5.94.0",
+    "webpack": "^5.104.1",
     "webpack-cli": "^3.3.11"
   }
 }
