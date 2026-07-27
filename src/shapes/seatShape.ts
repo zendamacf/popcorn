@@ -1,9 +1,19 @@
-import { Circle } from 'konva/lib/shapes/Circle';
 import { Group } from 'konva/lib/Group';
+import { Circle } from 'konva/lib/shapes/Circle';
 
+export type SeatShapeOptions = {
+  id?: string;
+  x: number;
+  y: number;
+  name: string;
+  seatWidth: number;
+  fillColor?: string;
+};
 
-class Seat {
-  constructor(fillColor, opts) {
+class SeatShape {
+  public group: Group;
+
+  public constructor(opts: SeatShapeOptions) {
     const group = new Group({
       id: opts.id,
       x: opts.x,
@@ -17,12 +27,12 @@ class Seat {
     // Don't preventDefault here, as we actually need events on this
     const circle = new Circle({
       radius: radius,
-      fill: fillColor,
+      fill: opts.fillColor,
     });
     group.add(circle);
 
-    return group;
+    this.group = group;
   }
 }
 
-export default Seat;
+export default SeatShape;

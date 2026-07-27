@@ -1,25 +1,26 @@
 {
-  "name": "popcorn",
-  "version": "1.0.0",
-  "description": "Seat reservation",
-  "main": "index.js",
-  "author": "Zach Lang <zach.d.lang@gmail.com>",
-  "license": "MIT",
-  "dependencies": {
-    "konva": "^6.0.0"
-  },
-  "scripts": {
-    "dev": "webpack --mode development --module-bind js=babel-loader",
-    "build": "webpack --mode production --module-bind js=babel-loader",
-    "lint": "eslint \"src/**/*.{js,ts}\""
-  },
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-minify": "^0.5.1",
-    "eslint": "^7.0.0",
-    "webpack": "^5.104.1",
-    "webpack-cli": "^3.3.11"
-  }
+	"name": "popcorn",
+	"version": "0.0.2",
+	"description": "Seat reservation",
+	"main": "index.js",
+	"author": "Zach Lang <zach.d.lang@gmail.com>",
+	"license": "MIT",
+	"dependencies": {
+		"konva": "^6.0.0",
+		"typescript": "^7.0.2"
+	},
+	"scripts": {
+		"dev": "webpack --mode development --module-bind js=babel-loader",
+		"build": "webpack --mode production --module-bind js=babel-loader",
+		"lint": "biome check src"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.5",
+		"babel-core": "^6.26.3",
+		"babel-loader": "^7.1.5",
+		"babel-preset-env": "^1.7.0",
+		"babel-preset-minify": "^0.5.1",
+		"webpack": "^5.104.1",
+		"webpack-cli": "^3.3.11"
+	}
 }

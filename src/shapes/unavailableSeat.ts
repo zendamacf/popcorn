@@ -1,11 +1,11 @@
 import { Line } from 'konva/lib/shapes/Line';
-import Seat from './seat';
+import SeatShape, { type SeatShapeOptions } from './seatShape';
 
+class UnavailableSeat extends SeatShape {
+  constructor(opts: SeatShapeOptions) {
+    super(opts);
 
-class UnavailableSeat {
-  constructor(opts) {
-    const group = new Seat(opts.seatColor, opts);
-    group.find('Circle').opacity(0.4);
+    this.group.find('Circle')[0].opacity(0.4);
 
     const radius = opts.seatWidth / 2;
 
@@ -18,11 +18,7 @@ class UnavailableSeat {
       points: [-lineEnd, lineEnd, 0, 0, lineEnd, -lineEnd],
       stroke: 'black',
     });
-    group
-      .add(line1)
-      .add(line2);
-
-    return group;
+    this.group.add(line1).add(line2);
   }
 }
 
