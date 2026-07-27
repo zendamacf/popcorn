@@ -11,8 +11,7 @@
   "scripts": {
     "dev": "webpack --mode development --module-bind js=babel-loader",
     "build": "webpack --mode production --module-bind js=babel-loader",
-    "watch": "yarn run build --watch",
-    "lint": "yarn eslint \"src/**/*.{js,ts}\""
+    "lint": "eslint \"src/**/*.{js,ts}\""
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
