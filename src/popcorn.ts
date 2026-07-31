@@ -1,8 +1,8 @@
+import type { Group } from 'konva/lib/Group';
 import { Layer } from 'konva/lib/Layer';
 import { Stage } from 'konva/lib/Stage';
 import { Rect } from 'konva/lib/shapes/Rect';
 import { Text as KText } from 'konva/lib/shapes/Text';
-import type { Group } from 'konva/types/Group';
 import { DEFAULTS } from './defaults';
 import EventSeat from './eventSeat';
 import Legend from './legend';
