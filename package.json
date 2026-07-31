@@ -2,7 +2,20 @@
 	"name": "popcorn",
 	"version": "0.0.2",
 	"description": "Seat reservation",
-	"main": "index.js",
+	"type": "module",
+	"main": "./dist/popcorn.min.js",
+	"module": "./dist/popcorn.js",
+	"types": "./dist/popcorn.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/popcorn.d.ts",
+			"import": "./dist/popcorn.js",
+			"default": "./dist/popcorn.min.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
 	"author": "Zach Lang <zach.d.lang@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
