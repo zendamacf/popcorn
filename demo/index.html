@@ -3,28 +3,147 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Popcorn Demo</title>
-  <meta name="description" content="Popcorn Demo">
+  <title>Popcorn — Interactive Seat Map Demo</title>
+  <meta name="description" content="Live demo of Popcorn, a JavaScript seat reservation library.">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
-  <div id="seats"></div>
-  <button type="button" id="get-seats">Get Seats</button>
-  <button type="button" id="set-seats">Randomise</button>
-  <button type="button" id="refresh">Reload</button>
-  <button type="button" id="remove">Destroy</button>
-  <div>
-    <label for="seat-svg">Seat SVG path <code>d</code></label>
-    <input
-      type="text"
-      id="seat-svg"
-      size="60"
-      placeholder="Leave empty for circles"
-      value="M28 10 H72 A8 8 0 0 1 80 18 V37 A8 8 0 0 1 72 45 H28 A8 8 0 0 1 20 37 V18 A8 8 0 0 1 28 10 Z M27 40 H73 A12 12 0 0 1 85 52 V78 A12 12 0 0 1 73 90 H27 A12 12 0 0 1 15 78 V52 A12 12 0 0 1 27 40 Z"
-    >
-    <button type="button" id="apply-svg">Apply shape</button>
+  <div class="app">
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo" aria-hidden="true">🍿</div>
+        <div>
+          <h1>Popcorn <span class="version-badge">v1.0.0</span></h1>
+          <p>Interactive seat reservation for the web</p>
+        </div>
+      </div>
+      <nav class="header-links">
+        <a href="https://github.com/zendamacf/popcorn" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/zendamacf/popcorn/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer">Release</a>
+      </nav>
+    </header>
+
+    <div class="main">
+      <aside class="sidebar">
+        <div class="sidebar-inner">
+          <section class="panel">
+            <div class="panel-header">Layout</div>
+            <div class="panel-body">
+              <div class="field">
+                <label for="width">Canvas width</label>
+                <input type="number" id="width" min="200" max="2000" value="1000">
+              </div>
+              <div class="field">
+                <label for="height">Canvas height</label>
+                <input type="number" id="height" min="200" max="1200" value="500">
+              </div>
+              <div class="field">
+                <label for="row-width">Seats per row</label>
+                <input type="number" id="row-width" min="1" max="30" value="12">
+              </div>
+              <div class="field">
+                <label for="max-seats">Max selection</label>
+                <input type="number" id="max-seats" min="1" max="20" value="3">
+              </div>
+              <div class="field">
+                <label for="seat-width">Seat size</label>
+                <input type="number" id="seat-width" min="10" max="80" value="30">
+              </div>
+              <div class="field">
+                <label for="seat-margin">Seat margin</label>
+                <input type="number" id="seat-margin" min="0" max="50" value="15">
+              </div>
+              <div class="field">
+                <label for="row-label-width">Row label width</label>
+                <input type="number" id="row-label-width" min="0" max="80" value="25">
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">Colors</div>
+            <div class="panel-body">
+              <div class="color-field">
+                <label for="background-color">Background</label>
+                <input type="color" id="background-color-picker" value="#202020">
+                <input type="text" id="background-color" value="#202020">
+              </div>
+              <div class="color-field">
+                <label for="seat-color">Available</label>
+                <input type="color" id="seat-color-picker" value="#d3d3d3">
+                <input type="text" id="seat-color" value="lightgrey">
+              </div>
+              <div class="color-field">
+                <label for="booked-color">Booked</label>
+                <input type="color" id="booked-color-picker" value="#bd1522">
+                <input type="text" id="booked-color" value="#BD1522">
+              </div>
+              <div class="color-field">
+                <label for="selected-color">Selected</label>
+                <input type="color" id="selected-color-picker" value="#009d3c">
+                <input type="text" id="selected-color" value="#009D3C">
+              </div>
+              <div class="color-field">
+                <label for="unavailable-color">Unavailable</label>
+                <input type="color" id="unavailable-color-picker" value="#000000">
+                <input type="text" id="unavailable-color" value="black">
+              </div>
+              <div class="color-field">
+                <label for="text-color">Text</label>
+                <input type="color" id="text-color-picker" value="#ffffff">
+                <input type="text" id="text-color" value="white">
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">Seat shape</div>
+            <div class="panel-body">
+              <div class="svg-field">
+                <label for="seat-svg">SVG path <code>d</code> (empty = circles)</label>
+                <textarea id="seat-svg" rows="3" placeholder="Leave empty for circles">M28 10 H72 A8 8 0 0 1 80 18 V37 A8 8 0 0 1 72 45 H28 A8 8 0 0 1 20 37 V18 A8 8 0 0 1 28 10 Z M27 40 H73 A12 12 0 0 1 85 52 V78 A12 12 0 0 1 73 90 H27 A12 12 0 0 1 15 78 V52 A12 12 0 0 1 27 40 Z</textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">Actions</div>
+            <div class="panel-body">
+              <div class="btn-row">
+                <button type="button" class="primary" id="apply">Apply changes</button>
+                <button type="button" id="refresh">Redraw</button>
+                <button type="button" id="randomise">Randomise</button>
+                <button type="button" class="danger" id="destroy">Destroy</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
+
+      <div class="canvas-area">
+        <div class="selected-bar">
+          <strong>Selected:</strong>
+          <span id="selected-seats">none</span>
+        </div>
+
+        <div class="canvas-wrapper">
+          <div id="seats"></div>
+        </div>
+
+        <div class="event-log">
+          <div class="event-log-header">
+            <span>Event log</span>
+            <button type="button" id="clear-log">Clear</button>
+          </div>
+          <ul id="event-log"></ul>
+        </div>
+      </div>
+    </div>
   </div>
+
   <script type="module" src="./main.ts"></script>
 </body>
 </html>

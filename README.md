@@ -1,6 +1,6 @@
 # popcorn
 
-~~Online demo~~ _TODO_
+[Live demo](https://zendamacf.github.io/popcorn/) (GitHub Pages, v1.0.0)
 
 ## CDN
 

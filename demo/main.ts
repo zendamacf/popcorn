@@ -1,116 +1,107 @@
-import Popcorn from '../src/popcorn';
+import Popcorn from './popcorn';
+import { seats } from './seats';
 
-const seats: SeatListItem[] = [
-  { id: 'A1', booked: true },
-  { id: 'A2', unavailable: true },
-  { id: 'A3', booked: true },
-  { id: 'A4' },
-  { id: 'A5' },
-  {},
-  {},
-  { id: 'A6' },
-  { id: 'A7' },
-  { id: 'A8' },
-  { id: 'A9' },
-  { id: 'A10' },
-  { id: 'B1' },
-  { id: 'B2', booked: true },
-  { id: 'B3' },
-  { id: 'B4', booked: true },
-  { id: 'B5' },
-  {},
-  {},
-  { id: 'B6', booked: true },
-  { id: 'B7', booked: true },
-  { id: 'B8' },
-  { id: 'B9' },
-  { id: 'B10' },
-  { id: 'C1', booked: true },
-  { id: 'C2', booked: true },
-  { id: 'C3' },
-  { id: 'C4' },
-  { id: 'C5' },
-  {},
-  {},
-  { id: 'C6' },
-  { id: 'C7' },
-  { id: 'C8' },
-  { id: 'C9' },
-  { id: 'C10' },
-  { id: 'D1' },
-  { id: 'D2' },
-  { id: 'D3' },
-  { id: 'D4' },
-  { id: 'D5' },
-  {},
-  {},
-  { id: 'D6', booked: true },
-  { id: 'D7', unavailable: true },
-  { id: 'D8', booked: true },
-  { id: 'D9', unavailable: true, booked: true },
-  { id: 'D10', booked: true },
-  { id: 'E1' },
-  { id: 'E2', unavailable: true },
-  { id: 'E3' },
-  { id: 'E4' },
-  { id: 'E5', booked: true },
-  {},
-  {},
-  { id: 'E6' },
-  { id: 'E7' },
-  { id: 'E8' },
-  { id: 'E9' },
-  { id: 'E10' },
-  { id: 'F1' },
-  { id: 'F2' },
-  { id: 'F3' },
-  { id: 'F4', booked: true },
-  { id: 'F5', booked: true },
-  {},
-  {},
-  { id: 'F6' },
-  { id: 'F7' },
-  { id: 'F8' },
-  { id: 'F9', booked: true },
-  { id: 'F10', booked: true },
-];
+const selectedSeatsEl = document.querySelector<HTMLSpanElement>('#selected-seats');
+const eventLogEl = document.querySelector<HTMLUListElement>('#event-log');
 
-const seatSvgInput = document.querySelector<HTMLInputElement>('#seat-svg');
+function getNumber(id: string): number {
+  const el = document.querySelector<HTMLInputElement>(`#${id}`);
+  return Number(el?.value ?? 0);
+}
 
-function readSeatSvg(): string | undefined {
-  const value = seatSvgInput?.value.trim();
+function getText(id: string): string {
+  return document.querySelector<HTMLInputElement>(`#${id}`)?.value.trim() ?? '';
+}
+
+function getSeatSvg(): string | undefined {
+  const value = document.querySelector<HTMLTextAreaElement>('#seat-svg')?.value.trim();
   return value || undefined;
 }
 
-function createPopcorn(): Popcorn {
-  const instance = new Popcorn({
+function readOptions(): PopcornInitOptions {
+  return {
     elem: '#seats',
-    width: 1000,
-    height: 500,
-    rowWidth: 12,
-    maxSeats: 3,
-    backgroundColor: '#202020',
-    bookedColor: '#BD1522',
-    selectedColor: '#009D3C',
-    textColor: 'white',
+    width: getNumber('width'),
+    height: getNumber('height'),
+    rowWidth: getNumber('row-width'),
+    maxSeats: getNumber('max-seats'),
+    seatWidth: getNumber('seat-width'),
+    seatMargin: getNumber('seat-margin'),
+    rowLabelWidth: getNumber('row-label-width'),
+    backgroundColor: getText('background-color'),
+    seatColor: getText('seat-color'),
+    bookedColor: getText('booked-color'),
+    selectedColor: getText('selected-color'),
+    unavailableColor: getText('unavailable-color'),
+    textColor: getText('text-color'),
     seatList: seats,
-    seatSvg: readSeatSvg(),
+    seatSvg: getSeatSvg(),
+  };
+}
+
+function updateSelectedDisplay(selected: string[]) {
+  if (!selectedSeatsEl) return;
+  selectedSeatsEl.textContent = selected.length > 0 ? selected.join(', ') : 'none';
+}
+
+function logEvent(message: string, className: string) {
+  if (!eventLogEl) return;
+  const item = document.createElement('li');
+  item.className = className;
+  item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+  eventLogEl.prepend(item);
+  while (eventLogEl.children.length > 50) {
+    eventLogEl.lastElementChild?.remove();
+  }
+}
+
+function bindColorPair(pickerId: string, textId: string) {
+  const picker = document.querySelector<HTMLInputElement>(`#${pickerId}`);
+  const text = document.querySelector<HTMLInputElement>(`#${textId}`);
+  if (!picker || !text) return;
+
+  picker.addEventListener('input', () => {
+    text.value = picker.value;
   });
+
+  text.addEventListener('input', () => {
+    const value = text.value.trim();
+    if (/^#[0-9a-f]{6}$/i.test(value)) {
+      picker.value = value;
+    }
+  });
+}
+
+function createPopcorn() {
+  const instance = new Popcorn(readOptions());
 
   instance.on('popcorn.selectseat', (e: Event) => {
-    console.log('SELECTING SEAT', (e as CustomEvent).detail);
-  });
-  instance.on('popcorn.deselectseat', (e: Event) => {
-    console.log('DESELECTING SEAT', (e as CustomEvent).detail);
-  });
-  instance.on('popcorn.maxseats', (e: Event) => {
-    console.log('MAX LIMIT', (e as CustomEvent).detail);
+    const detail = (e as CustomEvent).detail as { id: string; total: number };
+    logEvent(`Selected ${detail.id} (${detail.total} total)`, 'event-select');
+    updateSelectedDisplay(instance.selected);
   });
 
+  instance.on('popcorn.deselectseat', (e: Event) => {
+    const detail = (e as CustomEvent).detail as { id: string; total: number };
+    logEvent(`Deselected ${detail.id} (${detail.total} total)`, 'event-deselect');
+    updateSelectedDisplay(instance.selected);
+  });
+
+  instance.on('popcorn.maxseats', (e: Event) => {
+    const detail = (e as CustomEvent).detail as { total: number };
+    logEvent(`Max seats reached (${detail.total})`, 'event-max');
+  });
+
+  updateSelectedDisplay(instance.selected);
   return instance;
 }
 
 let popcorn = createPopcorn();
+
+function recreatePopcorn() {
+  popcorn.destroy();
+  popcorn = createPopcorn();
+}
 
 function randomAvailableSeat() {
   const available = seats.filter((seat) => !seat.unavailable && seat.id);
@@ -118,28 +109,39 @@ function randomAvailableSeat() {
   return available[index];
 }
 
-document.getElementById('get-seats')?.addEventListener('click', () => {
-  alert(popcorn.selected);
-});
+for (const [pickerId, textId] of [
+  ['background-color-picker', 'background-color'],
+  ['seat-color-picker', 'seat-color'],
+  ['booked-color-picker', 'booked-color'],
+  ['selected-color-picker', 'selected-color'],
+  ['unavailable-color-picker', 'unavailable-color'],
+  ['text-color-picker', 'text-color'],
+] as const) {
+  bindColorPair(pickerId, textId);
+}
 
-document.getElementById('set-seats')?.addEventListener('click', () => {
-  const selected: string[] = [];
-  while (selected.length < 3) {
-    const id = randomAvailableSeat().id;
-    if (id && !selected.includes(id)) selected.push(id);
-  }
-  popcorn.selected = selected;
-});
+document.getElementById('apply')?.addEventListener('click', recreatePopcorn);
 
 document.getElementById('refresh')?.addEventListener('click', () => {
   popcorn.redraw();
 });
 
-document.getElementById('remove')?.addEventListener('click', () => {
-  popcorn.destroy();
+document.getElementById('randomise')?.addEventListener('click', () => {
+  const maxSeats = getNumber('max-seats');
+  const selected: string[] = [];
+  while (selected.length < maxSeats) {
+    const id = randomAvailableSeat().id;
+    if (id && !selected.includes(id)) selected.push(id);
+  }
+  popcorn.selected = selected;
+  updateSelectedDisplay(popcorn.selected);
 });
 
-document.getElementById('apply-svg')?.addEventListener('click', () => {
+document.getElementById('destroy')?.addEventListener('click', () => {
   popcorn.destroy();
-  popcorn = createPopcorn();
+  logEvent('Instance destroyed', 'event-max');
+});
+
+document.getElementById('clear-log')?.addEventListener('click', () => {
+  eventLogEl?.replaceChildren();
 });
