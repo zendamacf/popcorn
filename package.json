@@ -12,11 +12,15 @@
 		"dev": "vite",
 		"build": "vite build",
 		"lint": "biome check src",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",
+		"@vitest/coverage-v8": "^4.1.10",
 		"typescript": "^7.0.2",
-		"vite": "^7.3.6"
+		"vite": "^7.3.6",
+		"vitest": "^4.1.10"
 	}
 }

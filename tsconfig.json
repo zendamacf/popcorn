@@ -10,6 +10,6 @@
       "konva/lib/*": ["./node_modules/konva/types/*"]
     }
   },
-  "include": ["src", "demo", "vite.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "demo", "vite.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "coverage"]
 }
