@@ -10,6 +10,8 @@ import Legend from './legend';
 import type SeatShape from './shapes/seatShape';
 import { centerKonvaNode, cloneArray, multiArray, rowLabel } from './utils';
 
+type SeatHandler = (event: Event) => void;
+
 class Popcorn {
   private opts: PopcornOptions;
   private elem: HTMLDivElement;
@@ -17,13 +19,22 @@ class Popcorn {
   private stage: Stage;
   private seatWidth: number;
   private centeringOffset: number;
+  private seatsById = new Map<string, EventSeat>();
+  private selectedIds = new Set<string>();
+  private listeners = new Map<string, Set<SeatHandler>>();
+  private seatLayer!: Layer;
+  private destroyed = false;
 
   constructor(options: PopcornInitOptions) {
     this.opts = { ...DEFAULTS, ...options };
-    if (!this.opts.seatList) throw 'No seatlist provided.';
+    this.assertOptions(this.opts);
 
     const elem = document.querySelector<HTMLDivElement>(this.opts.elem);
-    if (elem === null) throw 'Element not found.';
+    if (elem === null) {
+      throw new Error(
+        `Popcorn: element not found for selector "${this.opts.elem}"`,
+      );
+    }
     this.elem = elem;
 
     this.layout = cloneArray(this.opts.seatList);
@@ -47,6 +58,31 @@ class Popcorn {
     this.populateLayout();
     this.populateLegend(layoutWidth);
     this.stage.draw();
+  }
+
+  private assertOptions(opts: PopcornOptions): void {
+    if (!opts.seatList) {
+      throw new Error('Popcorn: seatList is required.');
+    }
+    if (!Number.isFinite(opts.rowWidth) || opts.rowWidth < 1) {
+      throw new Error(`Popcorn: rowWidth must be >= 1 (got ${opts.rowWidth})`);
+    }
+    if (!Number.isFinite(opts.maxSeats) || opts.maxSeats < 1) {
+      throw new Error(`Popcorn: maxSeats must be >= 1 (got ${opts.maxSeats})`);
+    }
+    if (!Number.isFinite(opts.width) || opts.width <= 0) {
+      throw new Error(`Popcorn: width must be > 0 (got ${opts.width})`);
+    }
+    if (!Number.isFinite(opts.height) || opts.height <= 0) {
+      throw new Error(`Popcorn: height must be > 0 (got ${opts.height})`);
+    }
+    if (!Number.isFinite(opts.seatWidth) || opts.seatWidth <= 0) {
+      throw new Error(`Popcorn: seatWidth must be > 0 (got ${opts.seatWidth})`);
+    }
+    const ids = opts.seatList.map((s) => s.id).filter(Boolean) as string[];
+    if (new Set(ids).size !== ids.length) {
+      throw new Error('Popcorn: seatList contains duplicate ids.');
+    }
   }
 
   /**
@@ -73,9 +109,10 @@ class Popcorn {
    * Populate the Stage with the seat layout.
    */
   private populateLayout(): void {
-    const layer = new Layer({
+    this.seatLayer = new Layer({
       preventDefault: false,
     });
+    const layer = this.seatLayer;
 
     const startX =
       this.centeringOffset + this.opts.rowLabelWidth + this.opts.seatWidth / 2;
@@ -159,53 +196,53 @@ class Popcorn {
     xOffset: number,
     yOffset: number,
   ): SeatShape {
-    const seat = new EventSeat(
-      Object.assign(
-        {
-          id: s.id,
-          x: xOffset,
-          y: yOffset,
-          unavailable: s.unavailable,
-          booked: s.booked,
-        },
-        this.opts,
-      ),
-    ).seatShape;
+    const eventSeat = new EventSeat({
+      id: s.id,
+      x: xOffset,
+      y: yOffset,
+      unavailable: s.unavailable,
+      booked: s.booked,
+      seatWidth: this.opts.seatWidth,
+      seatColor: this.opts.seatColor,
+      bookedColor: this.opts.bookedColor,
+      selectedColor: this.opts.selectedColor,
+      unavailableColor: this.opts.unavailableColor,
+      seatSvg: this.opts.seatSvg,
+    });
+    if (s.id) this.seatsById.set(s.id, eventSeat);
+    const seat = eventSeat.seatShape;
 
     seat.shape.on('click tap', (e) => {
-      // Click seems to happen on the circle, so get the group
       const shape = e.target.findAncestor('Group');
-      const seat = shape.getAttr('seat');
-      const seats = this.getSelected();
+      if (!shape) return;
+      const seat = shape.getAttr('seat') as EventSeat | undefined;
+      if (!seat?.id) return;
       if (seat.booked || seat.unavailable) return;
 
-      if (!seat.isSelected && seats.length >= this.opts.maxSeats) {
-        this.trigger('popcorn.maxseats', { total: seats.length });
+      if (!seat.isSelected && this.selectedIds.size >= this.opts.maxSeats) {
+        this.trigger('popcorn.maxseats', { total: this.selectedIds.size });
         return;
       }
 
-      // Alter the count, as it's taken before changing the state
       if (seat.isSelected) {
         seat.deselect();
+        this.selectedIds.delete(seat.id);
         this.trigger('popcorn.deselectseat', {
           seatid: seat.id,
-          total: seats.length - 1,
+          total: this.selectedIds.size,
         });
       } else {
         seat.select();
+        this.selectedIds.add(seat.id);
         this.trigger('popcorn.selectseat', {
           seatid: seat.id,
-          total: seats.length + 1,
+          total: this.selectedIds.size,
         });
       }
       this.redraw();
     });
 
     return seat;
-  }
-
-  private getSelected() {
-    return this.stage.find('.selected');
   }
 
   /**
@@ -249,21 +286,48 @@ class Popcorn {
    * @param {string} eventName Name of the event.
    * @param {function} eventHandler A callback function.
    */
-  public on(eventName: string, eventHandler: (event: Event) => void) {
+  public on(eventName: string, eventHandler: SeatHandler): void {
+    if (this.destroyed) return;
     this.elem.addEventListener(eventName, eventHandler);
+    let set = this.listeners.get(eventName);
+    if (!set) {
+      set = new Set();
+      this.listeners.set(eventName, set);
+    }
+    set.add(eventHandler);
+  }
+
+  /**
+   * Remove an event handler previously registered with `on`.
+   */
+  public off(eventName: string, eventHandler: SeatHandler): void {
+    this.elem.removeEventListener(eventName, eventHandler);
+    this.listeners.get(eventName)?.delete(eventHandler);
   }
 
   /**
    * Redraw the canvas.
    */
   public redraw(): void {
-    this.stage.draw();
+    if (this.destroyed) return;
+    this.seatLayer.batchDraw();
   }
 
   /**
    * Destroy the canvas.
    */
   public destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    for (const [name, handlers] of this.listeners) {
+      for (const handler of handlers) {
+        this.elem.removeEventListener(name, handler);
+      }
+    }
+    this.listeners.clear();
+    this.seatsById.clear();
+    this.selectedIds.clear();
+    this.elem.style.cursor = '';
     this.stage.destroy();
   }
 
@@ -271,28 +335,36 @@ class Popcorn {
    * Get the selected seats.
    */
   public get selected(): string[] {
-    const seats = this.getSelected();
-    const selected = seats.map((seat) => seat.id());
-    return selected;
+    return [...this.selectedIds];
   }
 
   /**
    * Set the selected seats.
    */
   public set selected(seats: string[]) {
-    this.getSelected().forEach((shape) => {
-      const seat = shape.getAttr('seat');
+    if (this.destroyed) return;
 
-      seat.deselect();
-    });
+    for (const id of this.selectedIds) {
+      this.seatsById.get(id)?.deselect();
+    }
+    this.selectedIds.clear();
 
-    seats.forEach((id) => {
-      const shape = this.stage.find(`#${id}`)[0];
-      const seat = shape.getAttr('seat');
-
+    for (const id of seats) {
+      const seat = this.seatsById.get(id);
+      if (!seat) {
+        throw new Error(`Popcorn: cannot select unknown seat id "${id}"`);
+      }
+      if (seat.booked || seat.unavailable) {
+        throw new Error(`Popcorn: seat "${id}" is not selectable`);
+      }
+      if (this.selectedIds.size >= this.opts.maxSeats) {
+        throw new Error(
+          `Popcorn: selection exceeds maxSeats (${this.opts.maxSeats})`,
+        );
+      }
       seat.select();
-    });
-
+      this.selectedIds.add(id);
+    }
     this.redraw();
   }
 }

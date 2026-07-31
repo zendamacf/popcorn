@@ -54,6 +54,7 @@ interface Window {
     options: PopcornInitOptions,
   ) => {
     on(eventName: string, eventHandler: (event: Event) => void): void;
+    off(eventName: string, eventHandler: (event: Event) => void): void;
     redraw(): void;
     destroy(): void;
     selected: string[];

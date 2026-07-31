@@ -9,7 +9,6 @@ const {
   layers,
   clickHandlers,
   eventSeatCalls,
-  selectedNodes,
   nodesById,
   MockEventSeat,
   MockLegend,
@@ -20,38 +19,22 @@ const {
 } = vi.hoisted(() => {
   const clickHandlers: Handler[] = [];
   const eventSeatCalls: unknown[] = [];
-  const selectedNodes: {
-    id: () => string;
-    getAttr: (key: string) => unknown;
-  }[] = [];
   const nodesById = new Map<string, { getAttr: (key: string) => unknown }>();
-
-  const collection = <T>(items: T[]) => {
-    const value = Object.assign([...items], {
-      toArray: () => [...items],
-    });
-    return value;
-  };
 
   const stage = {
     width: vi.fn(() => 1000),
     add: vi.fn(),
     draw: vi.fn(),
     destroy: vi.fn(),
-    find: vi.fn((selector: string) => {
-      if (selector === '.selected') return collection(selectedNodes);
-      if (selector.startsWith('#')) {
-        const node = nodesById.get(selector.slice(1));
-        return collection(node ? [node] : []);
-      }
-      return collection([]);
-    }),
     getAbsolutePosition: vi.fn(() => ({ x: 0, y: 0 })),
     setAbsolutePosition: vi.fn(),
     offsetX: vi.fn(),
   };
 
-  const layers: { add: ReturnType<typeof vi.fn> }[] = [];
+  const layers: {
+    add: ReturnType<typeof vi.fn>;
+    batchDraw: ReturnType<typeof vi.fn>;
+  }[] = [];
 
   function Stage(_opts: unknown) {
     return stage;
@@ -59,6 +42,7 @@ const {
 
   class Layer {
     add = vi.fn().mockReturnThis();
+    batchDraw = vi.fn();
     constructor() {
       layers.push(this);
     }
@@ -80,28 +64,34 @@ const {
   }
 
   function MockEventSeat(
-    this: { seatShape: unknown },
+    this: {
+      id?: string;
+      booked: boolean;
+      unavailable: boolean;
+      isSelected: boolean;
+      select: ReturnType<typeof vi.fn>;
+      deselect: ReturnType<typeof vi.fn>;
+      seatShape: unknown;
+    },
     opts: Record<string, unknown>,
   ) {
     eventSeatCalls.push(opts);
-    const seatApi = {
-      id: opts.id,
-      booked: Boolean(opts.booked),
-      unavailable: Boolean(opts.unavailable),
-      isSelected: false,
-      select: vi.fn(function select(this: { isSelected: boolean }) {
-        this.isSelected = true;
-      }),
-      deselect: vi.fn(function deselect(this: { isSelected: boolean }) {
-        this.isSelected = false;
-      }),
-    };
+    this.id = opts.id as string | undefined;
+    this.booked = Boolean(opts.booked);
+    this.unavailable = Boolean(opts.unavailable);
+    this.isSelected = false;
+    this.select = vi.fn(function select(this: { isSelected: boolean }) {
+      this.isSelected = true;
+    });
+    this.deselect = vi.fn(function deselect(this: { isSelected: boolean }) {
+      this.isSelected = false;
+    });
 
     const group = {
       on: vi.fn((eventName: string, handler: Handler) => {
         if (eventName === 'click tap') clickHandlers.push(handler);
       }),
-      getAttr: vi.fn((key: string) => (key === 'seat' ? seatApi : undefined)),
+      getAttr: vi.fn((key: string) => (key === 'seat' ? this : undefined)),
     };
 
     nodesById.set(String(opts.id), group);
@@ -124,7 +114,6 @@ const {
     layers,
     clickHandlers,
     eventSeatCalls,
-    selectedNodes,
     nodesById,
     MockEventSeat,
     MockLegend,
@@ -168,6 +157,14 @@ function mount(extra: Partial<PopcornInitOptions> = {}) {
   return { popcorn, elem };
 }
 
+function clickSeat(id: string) {
+  const group = nodesById.get(id);
+  const index = [...nodesById.keys()].indexOf(id);
+  clickHandlers[index]({
+    target: { findAncestor: () => group },
+  });
+}
+
 describe('Popcorn', () => {
   it('attaches the constructor to window for browser script usage', () => {
     expect(window.Popcorn).toBe(Popcorn);
@@ -177,25 +174,10 @@ describe('Popcorn', () => {
     document.body.innerHTML = '';
     clickHandlers.length = 0;
     eventSeatCalls.length = 0;
-    selectedNodes.length = 0;
     nodesById.clear();
     layers.length = 0;
     vi.clearAllMocks();
     stage.width.mockReturnValue(1000);
-    stage.find.mockImplementation((selector: string) => {
-      if (selector === '.selected') {
-        return Object.assign([...selectedNodes], {
-          toArray: () => [...selectedNodes],
-        });
-      }
-      if (selector.startsWith('#')) {
-        const node = nodesById.get(selector.slice(1));
-        return Object.assign(node ? [node] : [], {
-          toArray: () => (node ? [node] : []),
-        });
-      }
-      return Object.assign([], { toArray: () => [] });
-    });
   });
 
   afterEach(() => {
@@ -212,7 +194,7 @@ describe('Popcorn', () => {
           rowWidth: 4,
           maxSeats: 2,
         } as PopcornInitOptions),
-    ).toThrow('No seatlist provided.');
+    ).toThrow('Popcorn: seatList is required.');
   });
 
   it('throws when the target element is missing', () => {
@@ -226,7 +208,71 @@ describe('Popcorn', () => {
           maxSeats: 2,
           seatList: [{ id: 'A1' }],
         }),
-    ).toThrow('Element not found.');
+    ).toThrow('Popcorn: element not found for selector "#missing"');
+  });
+
+  it('throws on invalid rowWidth', () => {
+    const elem = document.createElement('div');
+    elem.id = 'seats';
+    document.body.appendChild(elem);
+
+    expect(
+      () =>
+        new Popcorn({
+          elem: '#seats',
+          width: 100,
+          height: 100,
+          rowWidth: 0,
+          maxSeats: 2,
+          seatList: [{ id: 'A1' }],
+        }),
+    ).toThrow('Popcorn: rowWidth must be >= 1');
+  });
+
+  it('throws on other invalid constructor options', () => {
+    const elem = document.createElement('div');
+    elem.id = 'seats';
+    document.body.appendChild(elem);
+
+    const base = {
+      elem: '#seats',
+      width: 100,
+      height: 100,
+      rowWidth: 4,
+      maxSeats: 2,
+      seatList: [{ id: 'A1' }],
+    };
+
+    expect(() => new Popcorn({ ...base, maxSeats: 0 })).toThrow(
+      'Popcorn: maxSeats must be >= 1',
+    );
+    expect(() => new Popcorn({ ...base, width: 0 })).toThrow(
+      'Popcorn: width must be > 0',
+    );
+    expect(() => new Popcorn({ ...base, height: -1 })).toThrow(
+      'Popcorn: height must be > 0',
+    );
+    expect(() => new Popcorn({ ...base, seatWidth: 0 })).toThrow(
+      'Popcorn: seatWidth must be > 0',
+    );
+  });
+
+  it('throws when seatList contains duplicate ids', () => {
+    const elem = document.createElement('div');
+    elem.id = 'seats';
+    document.body.appendChild(elem);
+
+    expect(
+      () =>
+        new Popcorn({
+          elem: '#seats',
+          width: 100,
+          height: 100,
+          rowWidth: 4,
+          maxSeats: 2,
+          seatList: [{ id: 'A1' }, { id: 'A1' }],
+        }),
+    ).toThrow('Popcorn: seatList contains duplicate ids.');
   });
 
   it('builds seats for entries with ids and skips empty placeholders', () => {
@@ -242,6 +288,23 @@ describe('Popcorn', () => {
     expect(layers.length).toBeGreaterThan(0);
   });
 
+  it('passes lean style options to EventSeat', () => {
+    mount();
+
+    expect(eventSeatCalls[0]).toEqual(
+      expect.objectContaining({
+        id: 'A1',
+        seatWidth: 30,
+        seatColor: 'lightgrey',
+        bookedColor: 'red',
+        selectedColor: '#00356D',
+        unavailableColor: 'black',
+      }),
+    );
+    expect(eventSeatCalls[0]).not.toHaveProperty('seatList');
+    expect(eventSeatCalls[0]).not.toHaveProperty('maxSeats');
+  });
+
   it('skips background layer when backgroundColor is omitted', () => {
     mount({ backgroundColor: undefined });
 
@@ -249,7 +312,7 @@ describe('Popcorn', () => {
     expect(stage.add.mock.calls.length).toBe(3);
   });
 
-  it('registers listeners, redraws, and destroys the stage', () => {
+  it('registers listeners, redraws, off, and destroys without leaking handlers', () => {
     const { popcorn, elem } = mount();
     const handler = vi.fn();
 
@@ -257,13 +320,26 @@ describe('Popcorn', () => {
     elem.dispatchEvent(
       new CustomEvent('popcorn.selectseat', { detail: { seatid: 'A1' } }),
     );
-    expect(handler).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledTimes(1);
 
+    popcorn.off('popcorn.selectseat', handler);
+    elem.dispatchEvent(
+      new CustomEvent('popcorn.selectseat', { detail: { seatid: 'A1' } }),
+    );
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    popcorn.on('popcorn.selectseat', handler);
     popcorn.redraw();
-    expect(stage.draw).toHaveBeenCalled();
+    expect(layers.some((layer) => layer.batchDraw.mock.calls.length > 0)).toBe(
+      true,
+    );
 
     popcorn.destroy();
     expect(stage.destroy).toHaveBeenCalled();
+    elem.dispatchEvent(
+      new CustomEvent('popcorn.selectseat', { detail: { seatid: 'A1' } }),
+    );
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 
   it('selects seats on click and emits select events', () => {
@@ -273,73 +349,67 @@ describe('Popcorn', () => {
       selected.push((event as CustomEvent).detail);
     });
 
-    const group = nodesById.get('A1');
-    clickHandlers[0]({
-      target: { findAncestor: () => group },
-    });
+    clickSeat('A1');
 
     expect(selected).toEqual([{ seatid: 'A1', total: 1 }]);
-    expect(stage.draw).toHaveBeenCalled();
+    expect(popcorn.selected).toEqual(['A1']);
+    expect(layers.some((layer) => layer.batchDraw.mock.calls.length > 0)).toBe(
+      true,
+    );
   });
 
   it('emits maxseats when the selection limit is reached', () => {
-    const { popcorn } = mount({ maxSeats: 1 });
+    const { popcorn } = mount({
+      maxSeats: 1,
+      seatList: [{ id: 'A1' }, { id: 'A2' }],
+    });
     const maxed: unknown[] = [];
     popcorn.on('popcorn.maxseats', (event) => {
       maxed.push((event as CustomEvent).detail);
     });
 
-    selectedNodes.push({
-      id: () => 'A2',
-      getAttr: () => ({ isSelected: true }),
-    });
-
-    const group = nodesById.get('A1');
-    clickHandlers[0]({
-      target: { findAncestor: () => group },
-    });
+    clickSeat('A1');
+    clickSeat('A2');
 
     expect(maxed).toEqual([{ total: 1 }]);
+    expect(popcorn.selected).toEqual(['A1']);
   });
 
   it('deselects an already selected seat on click', () => {
-    const { popcorn, elem } = mount();
+    const { popcorn } = mount();
     const deselected: unknown[] = [];
     popcorn.on('popcorn.deselectseat', (event) => {
       deselected.push((event as CustomEvent).detail);
     });
 
+    clickSeat('A1');
+    clickSeat('A1');
+
     const seatApi = nodesById.get('A1')?.getAttr('seat') as {
-      isSelected: boolean;
       deselect: ReturnType<typeof vi.fn>;
     };
-    seatApi.isSelected = true;
-    selectedNodes.push({
-      id: () => 'A1',
-      getAttr: () => seatApi,
-    });
-
-    clickHandlers[0]({
-      target: { findAncestor: () => nodesById.get('A1') },
-    });
-
     expect(seatApi.deselect).toHaveBeenCalled();
     expect(deselected).toEqual([{ seatid: 'A1', total: 0 }]);
-    expect(elem).toBeTruthy();
+    expect(popcorn.selected).toEqual([]);
   });
 
   it('ignores clicks on booked seats', () => {
     mount();
-    const group = nodesById.get('A2');
+    clickSeat('A2');
 
-    clickHandlers[1]({
-      target: { findAncestor: () => group },
-    });
-
-    const seatApi = group?.getAttr('seat') as {
+    const seatApi = nodesById.get('A2')?.getAttr('seat') as {
       select: ReturnType<typeof vi.fn>;
     };
     expect(seatApi.select).not.toHaveBeenCalled();
+  });
+
+  it('ignores clicks when the ancestor group is missing', () => {
+    mount();
+    expect(() =>
+      clickHandlers[0]({
+        target: { findAncestor: () => null },
+      }),
+    ).not.toThrow();
   });
 
   it('gets and sets the selected seat ids', () => {
@@ -348,17 +418,63 @@ describe('Popcorn', () => {
       select: ReturnType<typeof vi.fn>;
       deselect: ReturnType<typeof vi.fn>;
     };
-    const existing = {
-      id: () => 'A2',
-      getAttr: vi.fn(() => ({ deselect: vi.fn() })),
-    };
-    selectedNodes.push(existing);
 
-    expect(popcorn.selected).toEqual(['A2']);
+    expect(popcorn.selected).toEqual([]);
 
     popcorn.selected = ['A1'];
-    expect(existing.getAttr).toHaveBeenCalledWith('seat');
     expect(a1.select).toHaveBeenCalled();
-    expect(stage.draw).toHaveBeenCalled();
+    expect(popcorn.selected).toEqual(['A1']);
+    expect(layers.some((layer) => layer.batchDraw.mock.calls.length > 0)).toBe(
+      true,
+    );
+  });
+
+  it('replaces an existing selection when setting selected', () => {
+    const { popcorn } = mount({
+      maxSeats: 2,
+      seatList: [{ id: 'A1' }, { id: 'A3' }],
+    });
+    const a1 = nodesById.get('A1')?.getAttr('seat') as {
+      select: ReturnType<typeof vi.fn>;
+      deselect: ReturnType<typeof vi.fn>;
+    };
+    const a3 = nodesById.get('A3')?.getAttr('seat') as {
+      select: ReturnType<typeof vi.fn>;
+      deselect: ReturnType<typeof vi.fn>;
+    };
+
+    popcorn.selected = ['A1'];
+    a1.deselect.mockClear();
+    a3.select.mockClear();
+
+    popcorn.selected = ['A3'];
+
+    expect(a1.deselect).toHaveBeenCalled();
+    expect(a3.select).toHaveBeenCalled();
+    expect(popcorn.selected).toEqual(['A3']);
+  });
+
+  it('rejects unknown or unselectable ids when setting selected', () => {
+    const { popcorn } = mount();
+
+    expect(() => {
+      popcorn.selected = ['missing'];
+    }).toThrow('cannot select unknown seat id');
+
+    expect(() => {
+      popcorn.selected = ['A2'];
+    }).toThrow('is not selectable');
+  });
+
+  it('rejects setting more seats than maxSeats', () => {
+    const { popcorn } = mount({
+      maxSeats: 1,
+      seatList: [{ id: 'A1' }, { id: 'A3' }],
+    });
+
+    expect(() => {
+      popcorn.selected = ['A1', 'A3'];
+    }).toThrow('selection exceeds maxSeats (1)');
+    expect(popcorn.selected).toEqual(['A1']);
   });
 });
