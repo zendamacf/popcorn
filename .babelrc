@@ -1,8 +1,0 @@
-{
-  "env": {
-    "production": {
-      "presets": ["minify"],
-      "targets": "> 0.25%, not dead"
-    }
-  }
-}

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated from Yarn to Bun.
 - Replaced the compiled demo with a Vite live demo app.
 - Simplified seat rendering to a single `SeatShape` (removed empty seat subclasses).
+- Removed unused Webpack/Babel dependencies.
 
 ### Fixed
 - Legend seat swatches now use the configured available/booked/selected colours.

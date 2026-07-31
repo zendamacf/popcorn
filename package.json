@@ -6,8 +6,7 @@
 	"author": "Zach Lang <zach.d.lang@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
-		"konva": "^6.0.0",
-		"typescript": "^7.0.2"
+		"konva": "^6.0.0"
 	},
 	"scripts": {
 		"dev": "vite",
@@ -17,12 +16,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",
-		"babel-core": "^6.26.3",
-		"babel-loader": "^7.1.5",
-		"babel-preset-env": "^1.7.0",
-		"babel-preset-minify": "^0.5.1",
-		"vite": "^7.3.6",
-		"webpack": "^5.104.1",
-		"webpack-cli": "^7.1.0"
+		"typescript": "^7.0.2",
+		"vite": "^7.3.6"
 	}
 }
