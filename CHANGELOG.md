@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `unavailableColor` option for the X mark on unavailable seats.
+- Unit tests with Vitest and Codecov coverage reporting.
 
 ## [0.0.2] - 2020-05-29
 
