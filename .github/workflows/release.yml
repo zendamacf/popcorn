@@ -22,6 +22,19 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Extract changelog notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { capture = 1; next }
+            capture && $0 ~ /^## \[/ { exit }
+            capture { print }
+          ' CHANGELOG.md | sed -e 's/[[:space:]]*$//' -e '/./,$!d' > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "No CHANGELOG.md section found for ${GITHUB_REF_NAME} (expected ## [${VERSION}])" >&2
+            exit 1
+          fi
+
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -29,4 +42,4 @@ jobs:
           gh release create "${{ github.ref_name }}"
           dist/popcorn.min.js
           --title "${{ github.ref_name }}"
-          --generate-notes
+          --notes-file release-notes.md

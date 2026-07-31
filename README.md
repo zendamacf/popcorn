@@ -6,6 +6,8 @@
 
 Currently just hosted on GitHub [here](https://github.com/zendamacf/popcorn/releases).
 
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 ## Get Started
 
 First, you'll need an array of seats. Each seats needs to be an object with
