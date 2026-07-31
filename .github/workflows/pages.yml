@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'demo/**'
+      - 'scripts/demo-version.ts'
+      - 'scripts/verify-demo-pages.ts'
+      - 'vite.config.demo.ts'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
