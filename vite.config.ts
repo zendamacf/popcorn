@@ -1,9 +1,16 @@
+import { readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
-import { packageVersion, releaseTagUrl } from './scripts/package-version';
+import {
+  demoReleaseDownloadUrl,
+  demoReleaseTagUrl,
+  demoVersion,
+} from './scripts/demo-version';
+
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 const banner = `/*!
- * Popcorn v${packageVersion} (https://github.com/zendamacf/popcorn)
+ * Popcorn v${pkg.version} (https://github.com/zendamacf/popcorn)
  *
  * Licensed under the MIT License
  */`;
@@ -24,8 +31,8 @@ function prependBanner(): Plugin {
 export default defineConfig({
   plugins: [prependBanner()],
   define: {
-    __POPCORN_VERSION__: JSON.stringify(packageVersion),
-    __POPCORN_RELEASE_TAG_URL__: JSON.stringify(releaseTagUrl),
+    __DEMO_VERSION__: JSON.stringify(demoVersion),
+    __DEMO_RELEASE_TAG_URL__: JSON.stringify(demoReleaseTagUrl),
   },
   server: {
     open: process.env.CI ? false : '/demo/',

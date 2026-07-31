@@ -1,17 +1,17 @@
 import Popcorn from './popcorn';
 import { seats } from './seats';
 
-declare const __POPCORN_VERSION__: string;
-declare const __POPCORN_RELEASE_TAG_URL__: string;
+declare const __DEMO_VERSION__: string;
+declare const __DEMO_RELEASE_TAG_URL__: string;
 
 const versionBadge = document.querySelector<HTMLSpanElement>('#version-badge');
 if (versionBadge) {
-  versionBadge.textContent = `v${__POPCORN_VERSION__}`;
+  versionBadge.textContent = `v${__DEMO_VERSION__}`;
 }
 
 const releaseLink = document.querySelector<HTMLAnchorElement>('#release-link');
 if (releaseLink) {
-  releaseLink.href = __POPCORN_RELEASE_TAG_URL__;
+  releaseLink.href = __DEMO_RELEASE_TAG_URL__;
 }
 
 const selectedSeatsEl = document.querySelector<HTMLSpanElement>('#selected-seats');

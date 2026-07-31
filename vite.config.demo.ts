@@ -2,10 +2,10 @@ import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import {
-  packageVersion,
-  releaseDownloadUrl,
-  releaseTagUrl,
-} from './scripts/package-version';
+  demoReleaseDownloadUrl,
+  demoReleaseTagUrl,
+  demoVersion,
+} from './scripts/demo-version';
 
 function useReleasePopcorn(): Plugin {
   const shim = resolve(__dirname, 'demo/popcorn.release-shim.ts');
@@ -28,7 +28,7 @@ function injectReleaseScript(): Plugin {
       handler(html) {
         return html.replace(
           '</head>',
-          `  <script src="${releaseDownloadUrl}"></script>\n</head>`,
+          `  <script src="${demoReleaseDownloadUrl}"></script>\n</head>`,
         );
       },
     },
@@ -43,8 +43,8 @@ export default defineConfig({
   base: '/popcorn/',
   plugins: [useReleasePopcorn(), injectReleaseScript()],
   define: {
-    __POPCORN_VERSION__: JSON.stringify(packageVersion),
-    __POPCORN_RELEASE_TAG_URL__: JSON.stringify(releaseTagUrl),
+    __DEMO_VERSION__: JSON.stringify(demoVersion),
+    __DEMO_RELEASE_TAG_URL__: JSON.stringify(demoReleaseTagUrl),
   },
   build: {
     outDir: '../docs',
