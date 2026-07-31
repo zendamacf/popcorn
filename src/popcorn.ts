@@ -1,3 +1,5 @@
+// Ensures DragAndDrop (Konva.DD) is registered when using modular imports.
+import 'konva/lib/Core';
 import { Layer } from 'konva/lib/Layer';
 import { Stage } from 'konva/lib/Stage';
 import { Rect } from 'konva/lib/shapes/Rect';
@@ -168,7 +170,7 @@ class Popcorn {
         },
         this.opts,
       ),
-    ).shape;
+    ).seatShape;
 
     seat.shape.on('click tap', (e) => {
       // Click seems to happen on the circle, so get the group
@@ -203,7 +205,7 @@ class Popcorn {
   }
 
   private getSelected() {
-    return this.stage.find('.selected').toArray();
+    return this.stage.find('.selected');
   }
 
   /**

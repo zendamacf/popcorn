@@ -80,7 +80,7 @@ const {
   }
 
   function MockEventSeat(
-    this: { shape: unknown },
+    this: { seatShape: unknown },
     opts: Record<string, unknown>,
   ) {
     eventSeatCalls.push(opts);
@@ -105,7 +105,7 @@ const {
     };
 
     nodesById.set(String(opts.id), group);
-    this.shape = { shape: group };
+    this.seatShape = { shape: group };
   }
 
   function MockLegend() {

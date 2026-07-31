@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULTS } from './defaults';
 
-const { SeatShape, shape, body, createdWith } = vi.hoisted(() => {
+const { SeatShape, shape, body, createdWith, container } = vi.hoisted(() => {
+  const container = { style: { cursor: '' } };
   const body = { fill: vi.fn() };
   const shape = {
     on: vi.fn(),
     setAttr: vi.fn(),
     name: vi.fn(),
+    getStage: vi.fn(() => ({ container: () => container })),
   };
   shape.on.mockReturnValue(shape);
   shape.setAttr.mockReturnValue(shape);
@@ -22,7 +24,7 @@ const { SeatShape, shape, body, createdWith } = vi.hoisted(() => {
     this.body = body;
   }
 
-  return { SeatShape, shape, body, createdWith };
+  return { SeatShape, shape, body, createdWith, container };
 });
 
 vi.mock('./shapes/seatShape', () => ({ default: SeatShape }));
@@ -45,8 +47,10 @@ describe('EventSeat', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     createdWith.length = 0;
+    container.style.cursor = '';
     shape.on.mockReturnValue(shape);
     shape.setAttr.mockReturnValue(shape);
+    shape.getStage.mockReturnValue({ container: () => container });
   });
 
   it('creates a seat shape with available styling', () => {
@@ -136,46 +140,48 @@ describe('EventSeat', () => {
 
   it('sets cursor style from hover handlers', () => {
     new EventSeat({ ...baseOpts, id: 'A1' });
-    const handlers = Object.fromEntries(
-      shape.on.mock.calls.map(([eventName, handler]) => [eventName, handler]),
-    );
-    const container = { style: { cursor: '' } };
-    const event = {
-      target: {
-        getStage: () => ({ container: () => container }),
-      },
-    };
 
-    handlers.mouseenter(event);
+    expect(shape.on).toHaveBeenCalledWith(
+      'mouseenter pointerenter',
+      expect.any(Function),
+    );
+    expect(shape.on).toHaveBeenCalledWith(
+      'mouseleave pointerleave',
+      expect.any(Function),
+    );
+
+    const enter = shape.on.mock.calls.find(
+      ([eventName]) => eventName === 'mouseenter pointerenter',
+    )?.[1];
+    const leave = shape.on.mock.calls.find(
+      ([eventName]) => eventName === 'mouseleave pointerleave',
+    )?.[1];
+
+    enter();
     expect(container.style.cursor).toBe('pointer');
 
-    handlers.mouseleave(event);
+    leave();
     expect(container.style.cursor).toBe('');
 
-    const booked = new EventSeat({ ...baseOpts, id: 'B1', booked: true });
-    const bookedHandlers = Object.fromEntries(
-      shape.on.mock.calls
-        .slice(-2)
-        .map(([eventName, handler]) => [eventName, handler]),
-    );
-    bookedHandlers.mouseenter(event);
+    new EventSeat({ ...baseOpts, id: 'B1', booked: true });
+    const bookedEnter = shape.on.mock.calls
+      .filter(([eventName]) => eventName === 'mouseenter pointerenter')
+      .slice(-1)[0]?.[1];
+    bookedEnter();
     expect(container.style.cursor).toBe('not-allowed');
-    expect(booked.shape).toBe(booked.seatShape);
   });
 
   it('ignores hover when the stage container is missing', () => {
+    shape.getStage.mockReturnValue(null as never);
     new EventSeat({ ...baseOpts, id: 'A1' });
-    const handlers = Object.fromEntries(
-      shape.on.mock.calls.map(([eventName, handler]) => [eventName, handler]),
-    );
+    const enter = shape.on.mock.calls.find(
+      ([eventName]) => eventName === 'mouseenter pointerenter',
+    )?.[1];
+    const leave = shape.on.mock.calls.find(
+      ([eventName]) => eventName === 'mouseleave pointerleave',
+    )?.[1];
 
-    expect(() =>
-      handlers.mouseenter({ target: { getStage: () => null } }),
-    ).not.toThrow();
-    expect(() =>
-      handlers.mouseleave({
-        target: { getStage: () => ({ container: () => null }) },
-      }),
-    ).not.toThrow();
+    expect(() => enter()).not.toThrow();
+    expect(() => leave()).not.toThrow();
   });
 });

@@ -1,4 +1,3 @@
-import type { KonvaEventObject } from 'konva/lib/Node';
 import SeatShape from './shapes/seatShape';
 
 class EventSeat {
@@ -43,19 +42,23 @@ class EventSeat {
   }
 
   private bindEvents(): void {
+    const applyCursor = () => {
+      const container = this.seatShape.shape.getStage()?.container();
+      if (!container) return;
+      container.style.cursor =
+        this.booked || this.unavailable ? 'not-allowed' : 'pointer';
+    };
+    const clearCursor = () => {
+      const container = this.seatShape.shape.getStage()?.container();
+      if (!container) return;
+      container.style.cursor = '';
+    };
+
+    // Konva 10 enables pointer events by default; listen for both mouse and
+    // pointer enter/leave so cursor updates reliably across input types.
     this.seatShape.shape
-      .on('mouseenter', (e: KonvaEventObject<MouseEvent>) => {
-        const container = e.target?.getStage()?.container();
-        if (!container) return;
-        if (this.booked || this.unavailable)
-          container.style.cursor = 'not-allowed';
-        else container.style.cursor = 'pointer';
-      })
-      .on('mouseleave', (e: KonvaEventObject<MouseEvent>) => {
-        const container = e.target.getStage()?.container();
-        if (!container) return;
-        container.style.cursor = '';
-      })
+      .on('mouseenter pointerenter', applyCursor)
+      .on('mouseleave pointerleave', clearCursor)
       .setAttr('seat', this);
   }
 
@@ -98,13 +101,6 @@ class EventSeat {
   public change(): void {
     this.seatShape.body.fill(this.color());
     this.seatShape.shape.name(this.name());
-  }
-
-  /**
-   * Get the Konva shape object representing this seat.
-   */
-  public get shape(): SeatShape {
-    return this.seatShape;
   }
 }
 
