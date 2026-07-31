@@ -1,10 +1,11 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
-
-const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
-const releaseVersion = pkg.version;
-const releaseScriptUrl = `https://github.com/zendamacf/popcorn/releases/download/v${releaseVersion}/popcorn.min.js`;
+import {
+  packageVersion,
+  releaseDownloadUrl,
+  releaseTagUrl,
+} from './scripts/package-version';
 
 function useReleasePopcorn(): Plugin {
   const shim = resolve(__dirname, 'demo/popcorn.release-shim.ts');
@@ -27,7 +28,7 @@ function injectReleaseScript(): Plugin {
       handler(html) {
         return html.replace(
           '</head>',
-          `  <script src="${releaseScriptUrl}"></script>\n</head>`,
+          `  <script src="${releaseDownloadUrl}"></script>\n</head>`,
         );
       },
     },
@@ -41,6 +42,10 @@ export default defineConfig({
   root: 'demo',
   base: '/popcorn/',
   plugins: [useReleasePopcorn(), injectReleaseScript()],
+  define: {
+    __POPCORN_VERSION__: JSON.stringify(packageVersion),
+    __POPCORN_RELEASE_TAG_URL__: JSON.stringify(releaseTagUrl),
+  },
   build: {
     outDir: '../docs',
     emptyOutDir: true,

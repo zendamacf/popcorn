@@ -1,6 +1,6 @@
 # popcorn
 
-[Live demo](https://zendamacf.github.io/popcorn/) (GitHub Pages, v1.0.0)
+[Live demo](https://zendamacf.github.io/popcorn/)
 
 ## CDN
 

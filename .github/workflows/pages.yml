@@ -33,7 +33,7 @@ jobs:
         run: |
           test -f docs/index.html
           test -f docs/.nojekyll
-          grep -q 'releases/download/v1.0.0/popcorn.min.js' docs/index.html
+          bun run verify:demo
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
