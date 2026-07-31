@@ -23,6 +23,6 @@
 		"babel-preset-minify": "^0.5.1",
 		"vite": "^7.3.6",
 		"webpack": "^5.104.1",
-		"webpack-cli": "^3.3.11"
+		"webpack-cli": "^7.1.0"
 	}
 }
