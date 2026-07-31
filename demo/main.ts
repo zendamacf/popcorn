@@ -75,18 +75,42 @@ const seats: SeatListItem[] = [
   { id: 'F10', booked: true },
 ];
 
-const popcorn = new Popcorn({
-  elem: '#seats',
-  width: 1000,
-  height: 500,
-  rowWidth: 12,
-  maxSeats: 3,
-  backgroundColor: '#202020',
-  bookedColor: '#BD1522',
-  selectedColor: '#009D3C',
-  textColor: 'white',
-  seatList: seats,
-});
+const seatSvgInput = document.querySelector<HTMLInputElement>('#seat-svg');
+
+function readSeatSvg(): string | undefined {
+  const value = seatSvgInput?.value.trim();
+  return value || undefined;
+}
+
+function createPopcorn(): Popcorn {
+  const instance = new Popcorn({
+    elem: '#seats',
+    width: 1000,
+    height: 500,
+    rowWidth: 12,
+    maxSeats: 3,
+    backgroundColor: '#202020',
+    bookedColor: '#BD1522',
+    selectedColor: '#009D3C',
+    textColor: 'white',
+    seatList: seats,
+    seatSvg: readSeatSvg(),
+  });
+
+  instance.on('popcorn.selectseat', (e: Event) => {
+    console.log('SELECTING SEAT', (e as CustomEvent).detail);
+  });
+  instance.on('popcorn.deselectseat', (e: Event) => {
+    console.log('DESELECTING SEAT', (e as CustomEvent).detail);
+  });
+  instance.on('popcorn.maxseats', (e: Event) => {
+    console.log('MAX LIMIT', (e as CustomEvent).detail);
+  });
+
+  return instance;
+}
+
+let popcorn = createPopcorn();
 
 function randomAvailableSeat() {
   const available = seats.filter((seat) => !seat.unavailable && seat.id);
@@ -115,12 +139,7 @@ document.getElementById('remove')?.addEventListener('click', () => {
   popcorn.destroy();
 });
 
-popcorn.on('popcorn.selectseat', (e: Event) => {
-  console.log('SELECTING SEAT', (e as CustomEvent).detail);
-});
-popcorn.on('popcorn.deselectseat', (e: Event) => {
-  console.log('DESELECTING SEAT', (e as CustomEvent).detail);
-});
-popcorn.on('popcorn.maxseats', (e: Event) => {
-  console.log('MAX LIMIT', (e as CustomEvent).detail);
+document.getElementById('apply-svg')?.addEventListener('click', () => {
+  popcorn.destroy();
+  popcorn = createPopcorn();
 });

@@ -59,6 +59,7 @@ describe('Legend', () => {
         fillColor: DEFAULTS.seatColor,
         unavailable: false,
         unavailableColor: DEFAULTS.unavailableColor,
+        seatSvg: undefined,
       },
       {
         x: 62.5,
@@ -66,6 +67,7 @@ describe('Legend', () => {
         fillColor: DEFAULTS.seatColor,
         unavailable: true,
         unavailableColor: DEFAULTS.unavailableColor,
+        seatSvg: undefined,
       },
       {
         x: 112.5,
@@ -73,6 +75,7 @@ describe('Legend', () => {
         fillColor: DEFAULTS.bookedColor,
         unavailable: false,
         unavailableColor: DEFAULTS.unavailableColor,
+        seatSvg: undefined,
       },
       {
         x: 162.5,
@@ -80,6 +83,7 @@ describe('Legend', () => {
         fillColor: DEFAULTS.selectedColor,
         unavailable: false,
         unavailableColor: DEFAULTS.unavailableColor,
+        seatSvg: undefined,
       },
     ]);
 
@@ -91,5 +95,15 @@ describe('Legend', () => {
     ]);
     expect(group.add).toHaveBeenCalledTimes(8);
     expect(legend.shape).toBeInstanceOf(Group);
+  });
+
+  it('passes seatSvg through to each legend seat', () => {
+    new Legend(200, { ...opts, seatSvg: 'M0 0 H10 V10 Z' });
+
+    expect(
+      seatOpts.every(
+        (seat) => (seat as { seatSvg?: string }).seatSvg === 'M0 0 H10 V10 Z',
+      ),
+    ).toBe(true);
   });
 });

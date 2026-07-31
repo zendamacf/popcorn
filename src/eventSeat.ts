@@ -1,5 +1,4 @@
 import type { KonvaEventObject } from 'konva/lib/Node';
-import type { Circle } from 'konva/lib/shapes/Circle';
 import SeatShape from './shapes/seatShape';
 
 class EventSeat {
@@ -37,6 +36,7 @@ class EventSeat {
       fillColor: this.color(),
       unavailable: this.unavailable,
       unavailableColor: this.opts.unavailableColor,
+      seatSvg: this.opts.seatSvg,
     });
 
     this.bindEvents();
@@ -96,8 +96,7 @@ class EventSeat {
   }
 
   public change(): void {
-    const circle = this.seatShape.shape.findOne('Circle') as Circle;
-    circle.fill(this.color());
+    this.seatShape.body.fill(this.color());
     this.seatShape.shape.name(this.name());
   }
 

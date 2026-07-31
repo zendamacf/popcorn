@@ -14,6 +14,17 @@
   <button type="button" id="set-seats">Randomise</button>
   <button type="button" id="refresh">Reload</button>
   <button type="button" id="remove">Destroy</button>
+  <div>
+    <label for="seat-svg">Seat SVG path <code>d</code></label>
+    <input
+      type="text"
+      id="seat-svg"
+      size="60"
+      placeholder="Leave empty for circles"
+      value="M28 10 H72 A8 8 0 0 1 80 18 V37 A8 8 0 0 1 72 45 H28 A8 8 0 0 1 20 37 V18 A8 8 0 0 1 28 10 Z M27 40 H73 A12 12 0 0 1 85 52 V78 A12 12 0 0 1 73 90 H27 A12 12 0 0 1 15 78 V52 A12 12 0 0 1 27 40 Z"
+    >
+    <button type="button" id="apply-svg">Apply shape</button>
+  </div>
   <script type="module" src="./main.ts"></script>
 </body>
 </html>
