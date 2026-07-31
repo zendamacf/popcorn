@@ -11,7 +11,7 @@
 	},
 	"scripts": {
 		"dev": "vite",
-		"build": "webpack --mode production --module-bind js=babel-loader",
+		"build": "vite build",
 		"lint": "biome check src",
 		"typecheck": "tsc --noEmit"
 	},
