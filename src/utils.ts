@@ -29,10 +29,14 @@ const cloneArray = <T>(array: T[]): T[] => {
  * @param {Array} array The 1D array to convert.
  * @param {number} maxLength The maximum length of the second dimension arrays.
  */
-const multiArray = <T>(array: T[], maxLength: number): T[][] => {
+const multiArray = <T>(array: readonly T[], maxLength: number): T[][] => {
+  if (!Number.isFinite(maxLength) || maxLength < 1) {
+    throw new Error(`multiArray: maxLength must be >= 1 (got ${maxLength})`);
+  }
   const multi: T[][] = [];
-  while (array.length) multi.push(array.splice(0, maxLength));
-
+  for (let i = 0; i < array.length; i += maxLength) {
+    multi.push(array.slice(i, i + maxLength));
+  }
   return multi;
 };
 

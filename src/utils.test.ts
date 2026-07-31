@@ -35,10 +35,14 @@ describe('multiArray', () => {
     expect(multiArray([...input], 2)).toEqual([[1, 2], [3, 4], [5]]);
   });
 
-  it('mutates the source array by draining it', () => {
+  it('does not mutate the source array', () => {
     const input = [1, 2, 3];
-    multiArray(input, 2);
-    expect(input).toEqual([]);
+    expect(multiArray(input, 2)).toEqual([[1, 2], [3]]);
+    expect(input).toEqual([1, 2, 3]);
+  });
+
+  it('rejects non-positive chunk sizes', () => {
+    expect(() => multiArray([1], 0)).toThrow(/maxLength must be >= 1/);
   });
 });
 
