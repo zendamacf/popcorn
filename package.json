@@ -24,6 +24,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:demo": "vite build --config vite.config.demo.ts",
+    "verify:demo": "bun scripts/verify-demo-pages.ts",
     "lint": "biome check src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

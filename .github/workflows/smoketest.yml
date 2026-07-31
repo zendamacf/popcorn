@@ -39,3 +39,9 @@ jobs:
           curl -sf http://127.0.0.1:5173/demo/ | grep -q 'main.ts'
           curl -sf http://127.0.0.1:5173/demo/main.ts >/dev/null
           curl -sf http://127.0.0.1:5173/src/popcorn.ts >/dev/null
+
+      - name: Build GitHub Pages demo
+        run: bun run build:demo
+
+      - name: Verify Pages demo output
+        run: bun run verify:demo
