@@ -1,14 +1,24 @@
 import SeatShape from './shapes/seatShape';
 
+export type EventSeatStyle = Pick<
+  PopcornDefaults,
+  | 'seatWidth'
+  | 'seatColor'
+  | 'bookedColor'
+  | 'selectedColor'
+  | 'unavailableColor'
+  | 'seatSvg'
+>;
+
 class EventSeat {
-  private id?: string;
+  public id?: string;
   private x: number;
   private y: number;
-  private booked: boolean;
-  private unavailable: boolean;
-  private isSelected: boolean;
+  public booked: boolean;
+  public unavailable: boolean;
+  public isSelected: boolean;
   public seatShape: SeatShape;
-  private opts: PopcornOptions;
+  private opts: EventSeatStyle;
 
   constructor({
     id,
@@ -17,7 +27,7 @@ class EventSeat {
     booked,
     unavailable,
     ...opts
-  }: SeatListItem & PopcornOptions & { x: number; y: number }) {
+  }: SeatListItem & EventSeatStyle & { x: number; y: number }) {
     this.id = id;
     this.x = x;
     this.y = y;
