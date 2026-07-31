@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "konva/lib/*": ["./node_modules/konva/types/*"]
+    }
+  },
+  "include": ["src", "demo", "vite.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}

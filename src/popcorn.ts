@@ -1,20 +1,28 @@
-import { Stage } from 'konva/lib/Stage';
 import { Layer } from 'konva/lib/Layer';
+import { Stage } from 'konva/lib/Stage';
 import { Rect } from 'konva/lib/shapes/Rect';
 import { Text as KText } from 'konva/lib/shapes/Text';
+import { DEFAULTS } from './defaults';
 import EventSeat from './eventSeat';
 import Legend from './legend';
-import { DEFAULTS } from './defaults';
-import { rowLabel, cloneArray, multiArray, centerKonvaNode } from './utils';
-
+import type SeatShape from './shapes/seatShape';
+import { centerKonvaNode, cloneArray, multiArray, rowLabel } from './utils';
 
 class Popcorn {
-  constructor(options) {
-    this.opts = Object.assign(DEFAULTS, options || {});
+  private opts: PopcornOptions;
+  private elem: HTMLDivElement;
+  private layout: SeatListItem[];
+  private stage: Stage;
+  private seatWidth: number;
+  private centeringOffset: number;
+
+  constructor(options: PopcornInitOptions) {
+    this.opts = { ...DEFAULTS, ...options };
     if (!this.opts.seatList) throw 'No seatlist provided.';
 
-    this.elem = document.querySelector(this.opts.elem);
-    if (this.elem === null) throw 'Element not found.';
+    const elem = document.querySelector<HTMLDivElement>(this.opts.elem);
+    if (elem === null) throw 'Element not found.';
+    this.elem = elem;
 
     this.layout = cloneArray(this.opts.seatList);
 
@@ -27,20 +35,22 @@ class Popcorn {
 
     this.seatWidth = this.opts.seatWidth + this.opts.seatMargin;
     // Center the seats in the middle of the canvas
-    const layoutWidth = Math.min(this.layout.length, this.opts.rowWidth) * this.seatWidth + this.opts.rowLabelWidth;
+    const layoutWidth =
+      Math.min(this.layout.length, this.opts.rowWidth) * this.seatWidth +
+      this.opts.rowLabelWidth;
     this.centeringOffset = (this.opts.width - layoutWidth) / 2;
 
-    if (this.opts.backgroundColor) this._populateBackground();
-    this._populateFrontLabel();
-    this._populateLayout();
-    this._populateLegend(layoutWidth);
+    if (this.opts.backgroundColor) this.populateBackground();
+    this.populateFrontLabel();
+    this.populateLayout();
+    this.populateLegend(layoutWidth);
     this.stage.draw();
   }
 
   /**
    * Create a full sized background layer.
    */
-  _populateBackground() {
+  private populateBackground(): void {
     const backLayer = new Layer({
       preventDefault: false,
     });
@@ -60,26 +70,31 @@ class Popcorn {
   /**
    * Populate the Stage with the seat layout.
    */
-  _populateLayout() {
+  private populateLayout(): void {
     const layer = new Layer({
       preventDefault: false,
     });
 
-    const startX = this.centeringOffset + this.opts.rowLabelWidth + this.opts.seatWidth / 2;
+    const startX =
+      this.centeringOffset + this.opts.rowLabelWidth + this.opts.seatWidth / 2;
     // 60 pixels is to offset the front label
     const startY = 80 + this.opts.seatWidth / 2;
 
     const seatList = multiArray(this.layout, this.opts.rowWidth);
     for (const [rowIndex, row] of seatList.entries()) {
       const yOffset = startY + this.seatWidth * rowIndex;
-      const label = this._buildRowLabel(rowIndex + 1, yOffset);
+      const label = this.buildRowLabel(rowIndex + 1, yOffset);
       layer.add(label);
 
       for (const [colIndex, col] of row.entries()) {
         // If id is not provided, leave an empty space
         if (col.id) {
-          const seat = this._buildSeat(col, startX + this.seatWidth * colIndex, yOffset);
-          layer.add(seat);
+          const seat = this.buildSeat(
+            col,
+            startX + this.seatWidth * colIndex,
+            yOffset,
+          );
+          layer.add(seat.shape);
         }
       }
     }
@@ -87,7 +102,7 @@ class Popcorn {
     this.stage.add(layer);
   }
 
-  _populateFrontLabel() {
+  private populateFrontLabel(): void {
     const layer = new Layer({
       preventDefault: false,
     });
@@ -101,7 +116,7 @@ class Popcorn {
     });
     centerKonvaNode(rect, this.stage);
     layer.add(rect);
-    
+
     const label = new KText({
       y: 20,
       fontSize: 20,
@@ -120,24 +135,28 @@ class Popcorn {
     this.stage.add(layer);
   }
 
-  _populateLegend(layoutWidth) {
+  private populateLegend(layoutWidth: number): void {
     const legend = new Legend(layoutWidth, this.opts);
-    centerKonvaNode(legend, this.stage);
+    centerKonvaNode(legend.shape, this.stage);
 
     const layer = new Layer({
       preventDefault: false,
     });
-    layer.add(legend);
+    layer.add(legend.shape);
     this.stage.add(layer);
   }
 
   /**
    * Create a Seat object.
-   * @param {Object} s An object with seat details.
+   * @param {SeatListItem} s An object with seat details.
    * @param {number} xOffset The X offset in pixels.
    * @param {number} yOffset The Y offset in pixels.
    */
-  _buildSeat(s, xOffset, yOffset) {
+  private buildSeat(
+    s: SeatListItem,
+    xOffset: number,
+    yOffset: number,
+  ): SeatShape {
     const seat = new EventSeat(
       Object.assign(
         {
@@ -147,39 +166,44 @@ class Popcorn {
           unavailable: s.unavailable,
           booked: s.booked,
         },
-        this.opts
-      )
+        this.opts,
+      ),
     ).shape;
 
-    seat.on('click tap', (e) => {
+    seat.shape.on('click tap', (e) => {
       // Click seems to happen on the circle, so get the group
       const shape = e.target.findAncestor('Group');
       const seat = shape.getAttr('seat');
-      const seats = this._getSelected();
+      const seats = this.getSelected();
       if (seat.booked || seat.unavailable) return;
 
       if (!seat.isSelected && seats.length >= this.opts.maxSeats) {
-        this._trigger('popcorn.maxseats', {total: seats.length});
+        this.trigger('popcorn.maxseats', { total: seats.length });
         return;
       }
 
       // Alter the count, as it's taken before changing the state
       if (seat.isSelected) {
         seat.deselect();
-        this._trigger('popcorn.deselectseat', {seatid: seat.id, total: seats.length - 1});
+        this.trigger('popcorn.deselectseat', {
+          seatid: seat.id,
+          total: seats.length - 1,
+        });
       } else {
         seat.select();
-        this._trigger('popcorn.selectseat', {seatid: seat.id, total: seats.length + 1});
+        this.trigger('popcorn.selectseat', {
+          seatid: seat.id,
+          total: seats.length + 1,
+        });
       }
       this.redraw();
-
     });
 
     return seat;
   }
 
-  _getSelected() {
-    return this.stage.find('.selected');
+  private getSelected() {
+    return this.stage.find('.selected').toArray();
   }
 
   /**
@@ -187,7 +211,7 @@ class Popcorn {
    * @param {number} rowNumber The row number.
    * @param {number} yOffset The Y offset in pixels.
    */
-  _buildRowLabel(rowNumber, yOffset) {
+  private buildRowLabel(rowNumber: number, yOffset: number): KText {
     const label = new KText({
       x: this.centeringOffset,
       y: yOffset - this.opts.seatMargin / 2,
@@ -207,14 +231,14 @@ class Popcorn {
    * @param {string} eventName Name of the event.
    * @param {Object} eventData An object with any associated data.
    */
-  _trigger(eventName, eventData) {
+  private trigger(
+    eventName: PopcornEvent,
+    eventData: Record<string, unknown>,
+  ): void {
     const detail = eventData || {};
-    const event = new CustomEvent(
-      eventName,
-      {
-        detail: detail
-      }
-    );
+    const event = new CustomEvent(eventName, {
+      detail: detail,
+    });
     this.elem.dispatchEvent(event);
   }
 
@@ -223,47 +247,44 @@ class Popcorn {
    * @param {string} eventName Name of the event.
    * @param {function} eventHandler A callback function.
    */
-  on(eventName, eventHandler) {
-    this.elem.addEventListener(
-      eventName,
-      eventHandler
-    );
+  public on(eventName: string, eventHandler: (event: Event) => void) {
+    this.elem.addEventListener(eventName, eventHandler);
   }
 
   /**
    * Redraw the canvas.
    */
-  redraw() {
+  public redraw(): void {
     this.stage.draw();
   }
 
   /**
    * Destroy the canvas.
    */
-  destroy() {
+  public destroy(): void {
     this.stage.destroy();
   }
 
   /**
    * Get the selected seats.
    */
-  get selected() {
-    const seats = this._getSelected();
-    const selected = seats.map(seat => seat.id());
+  public get selected(): string[] {
+    const seats = this.getSelected();
+    const selected = seats.map((seat) => seat.id());
     return selected;
   }
 
   /**
    * Set the selected seats.
    */
-  set selected(seats) {
-    this._getSelected().each((shape) => {
+  public set selected(seats: string[]) {
+    this.getSelected().forEach((shape) => {
       const seat = shape.getAttr('seat');
 
       seat.deselect();
     });
 
-    seats.forEach(id => {
+    seats.forEach((id) => {
       const shape = this.stage.find(`#${id}`)[0];
       const seat = shape.getAttr('seat');
 
@@ -276,3 +297,5 @@ class Popcorn {
 
 // Assign to window for use in standard browser
 window.Popcorn = Popcorn;
+
+export default Popcorn;
