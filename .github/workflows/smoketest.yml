@@ -3,6 +3,9 @@ name: Smoketest
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   smoketest:
     runs-on: ubuntu-latest
