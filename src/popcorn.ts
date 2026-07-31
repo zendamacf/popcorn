@@ -1,4 +1,3 @@
-import type { Group } from 'konva/lib/Group';
 import { Layer } from 'konva/lib/Layer';
 import { Stage } from 'konva/lib/Stage';
 import { Rect } from 'konva/lib/shapes/Rect';
@@ -11,7 +10,7 @@ import { centerKonvaNode, cloneArray, multiArray, rowLabel } from './utils';
 
 class Popcorn {
   private opts: PopcornOptions;
-  private elem: HTMLElement;
+  private elem: HTMLDivElement;
   private layout: SeatListItem[];
   private stage: Stage;
   private seatWidth: number;
@@ -21,8 +20,9 @@ class Popcorn {
     this.opts = { ...DEFAULTS, ...options };
     if (!this.opts.seatList) throw 'No seatlist provided.';
 
-    this.elem = document.querySelector(this.opts.elem);
-    if (this.elem === null) throw 'Element not found.';
+    const elem = document.querySelector<HTMLDivElement>(this.opts.elem);
+    if (elem === null) throw 'Element not found.';
+    this.elem = elem;
 
     this.layout = cloneArray(this.opts.seatList);
 
@@ -94,7 +94,7 @@ class Popcorn {
             startX + this.seatWidth * colIndex,
             yOffset,
           );
-          layer.add(seat);
+          layer.add(seat.shape);
         }
       }
     }
@@ -137,12 +137,12 @@ class Popcorn {
 
   private populateLegend(layoutWidth: number): void {
     const legend = new Legend(layoutWidth, this.opts);
-    centerKonvaNode(legend, this.stage);
+    centerKonvaNode(legend.shape, this.stage);
 
     const layer = new Layer({
       preventDefault: false,
     });
-    layer.add(legend);
+    layer.add(legend.shape);
     this.stage.add(layer);
   }
 
@@ -170,7 +170,7 @@ class Popcorn {
       ),
     ).shape;
 
-    seat.group.on('click tap', (e) => {
+    seat.shape.on('click tap', (e) => {
       // Click seems to happen on the circle, so get the group
       const shape = e.target.findAncestor('Group');
       const seat = shape.getAttr('seat');
@@ -202,8 +202,8 @@ class Popcorn {
     return seat;
   }
 
-  private getSelected(): Group[] {
-    return this.stage.find('.selected');
+  private getSelected() {
+    return this.stage.find('.selected').toArray();
   }
 
   /**
@@ -278,7 +278,7 @@ class Popcorn {
    * Set the selected seats.
    */
   public set selected(seats: string[]) {
-    this.getSelected().each((shape) => {
+    this.getSelected().forEach((shape) => {
       const seat = shape.getAttr('seat');
 
       seat.deselect();

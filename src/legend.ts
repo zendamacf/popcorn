@@ -9,7 +9,7 @@ import {
 } from './shapes';
 
 class Legend {
-  public group: Group;
+  public shape: Group;
   private opts: PopcornOptions;
   private halfText: number;
   private width: number;
@@ -28,7 +28,7 @@ class Legend {
     this.entryPadding = this.entryWidth / 4;
     this.seatWidth = this.opts.seatWidth / 2 + this.opts.seatMargin;
 
-    this.group = new Group({
+    this.shape = new Group({
       x: 20,
       y: this.opts.height - 40,
       width: this.width,
@@ -78,7 +78,7 @@ class Legend {
       preventDefault: false,
     });
 
-    this.group.add(seat.group).add(label);
+    this.shape.add(seat.shape).add(label);
   }
 }
 

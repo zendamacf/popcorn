@@ -1,3 +1,5 @@
+import type { KonvaEventObject } from 'konva/lib/Node';
+import type { Circle } from 'konva/lib/shapes/Circle';
 import type { SeatType } from './shapes';
 import AvailableSeat from './shapes/availableSeat';
 import BookedSeat from './shapes/bookedSeat';
@@ -51,15 +53,17 @@ class EventSeat {
   }
 
   private bindEvents(): void {
-    this.seatShape.group
-      .on('mouseenter', (e) => {
-        const container = e.target?.getStage().container();
+    this.seatShape.shape
+      .on('mouseenter', (e: KonvaEventObject<MouseEvent>) => {
+        const container = e.target?.getStage()?.container();
+        if (!container) return;
         if (this.booked || this.unavailable)
           container.style.cursor = 'not-allowed';
         else container.style.cursor = 'pointer';
       })
-      .on('mouseleave', (e) => {
-        const container = e.target.getStage().container();
+      .on('mouseleave', (e: KonvaEventObject<MouseEvent>) => {
+        const container = e.target.getStage()?.container();
+        if (!container) return;
         container.style.cursor = '';
       })
       .setAttr('seat', this);
@@ -102,8 +106,9 @@ class EventSeat {
   }
 
   public change(): void {
-    this.seatShape.group.find('Circle').fill(this.color());
-    this.seatShape.group.name(this.name());
+    const circle = this.seatShape.shape.findOne('Circle') as Circle;
+    circle.fill(this.color());
+    this.seatShape.shape.name(this.name());
   }
 
   /**

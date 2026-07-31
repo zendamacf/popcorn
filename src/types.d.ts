@@ -35,3 +35,12 @@ type PopcornEvent =
   | 'popcorn.selectseat'
   | 'popcorn.deselectseat'
   | 'popcorn.maxseats';
+
+interface Window {
+  Popcorn: new (options: PopcornOptions) => {
+    on(eventName: string, eventHandler: () => void): void;
+    redraw(): void;
+    destroy(): void;
+    selected: string[];
+  };
+}

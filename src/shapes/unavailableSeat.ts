@@ -5,7 +5,7 @@ class UnavailableSeat extends SeatShape {
   constructor(opts: SeatShapeOptions) {
     super(opts);
 
-    this.group.find('Circle')[0].opacity(0.4);
+    this.shape.find('Circle')[0].opacity(0.4);
 
     const radius = opts.seatWidth / 2;
 
@@ -18,7 +18,7 @@ class UnavailableSeat extends SeatShape {
       points: [-lineEnd, lineEnd, 0, 0, lineEnd, -lineEnd],
       stroke: 'black',
     });
-    this.group.add(line1).add(line2);
+    this.shape.add(line1).add(line2);
   }
 }
 

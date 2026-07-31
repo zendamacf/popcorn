@@ -42,8 +42,8 @@ const multiArray = <T>(array: T[], maxLength: number): T[][] => {
  * @param {Konva.Node} parent The parent Node to be centered inside of.
  */
 const centerKonvaNode = (node: Node, parent: Node): void => {
-  const { y } = node.absolutePosition();
-  node.absolutePosition({ x: parent.width() / 2, y: y });
+  const { y } = node.getAbsolutePosition();
+  node.setAbsolutePosition({ x: parent.width() / 2, y: y });
   node.offsetX(node.width() / 2);
 };
 

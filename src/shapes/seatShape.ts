@@ -3,18 +3,18 @@ import { Circle } from 'konva/lib/shapes/Circle';
 
 export type SeatShapeOptions = {
   id?: string;
-  x: number;
-  y: number;
-  name: string;
+  x?: number;
+  y?: number;
+  name?: string;
   seatWidth: number;
   fillColor?: string;
 };
 
 class SeatShape {
-  public group: Group;
+  public shape: Group;
 
   public constructor(opts: SeatShapeOptions) {
-    const group = new Group({
+    const shape = new Group({
       id: opts.id,
       x: opts.x,
       y: opts.y,
@@ -29,9 +29,9 @@ class SeatShape {
       radius: radius,
       fill: opts.fillColor,
     });
-    group.add(circle);
+    shape.add(circle);
 
-    this.group = group;
+    this.shape = shape;
   }
 }
 
