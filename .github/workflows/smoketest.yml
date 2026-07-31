@@ -1,0 +1,41 @@
+name: Smoketest
+
+on:
+  pull_request:
+
+jobs:
+  smoketest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
+
+      - name: Verify build output
+        run: test -f dist/popcorn.min.js
+
+      - name: Start dev server
+        run: bun run dev --host 127.0.0.1 --port 5173 &
+
+      - name: Wait for dev server
+        run: |
+          for _ in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:5173/demo/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Dev server did not become ready in time" >&2
+          exit 1
+
+      - name: Smoke test demo
+        run: |
+          curl -sf http://127.0.0.1:5173/demo/ | grep -q 'main.ts'
+          curl -sf http://127.0.0.1:5173/demo/main.ts >/dev/null
+          curl -sf http://127.0.0.1:5173/src/popcorn.ts >/dev/null

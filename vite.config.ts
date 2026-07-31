@@ -26,7 +26,7 @@ function prependBanner(): Plugin {
 export default defineConfig({
   plugins: [prependBanner()],
   server: {
-    open: '/demo/',
+    open: process.env.CI ? false : '/demo/',
   },
   build: {
     outDir: 'dist',
