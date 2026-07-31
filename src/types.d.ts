@@ -15,6 +15,11 @@ type PopcornDefaults = {
   seatMargin: number;
   /** Width of row label in pixels */
   rowLabelWidth: number;
+  /**
+   * SVG path `d` data used to draw each seat.
+   * When omitted, seats are drawn as circles.
+   */
+  seatSvg?: string;
 };
 
 type SeatListItem = {

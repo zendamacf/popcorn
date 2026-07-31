@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULTS } from './defaults';
 
-const { SeatShape, shape, circle, createdWith } = vi.hoisted(() => {
-  const circle = { fill: vi.fn() };
+const { SeatShape, shape, body, createdWith } = vi.hoisted(() => {
+  const body = { fill: vi.fn() };
   const shape = {
     on: vi.fn(),
     setAttr: vi.fn(),
-    findOne: vi.fn(() => circle),
     name: vi.fn(),
   };
   shape.on.mockReturnValue(shape);
@@ -14,12 +13,16 @@ const { SeatShape, shape, circle, createdWith } = vi.hoisted(() => {
 
   const createdWith: unknown[] = [];
 
-  function SeatShape(this: { shape: typeof shape }, opts: unknown) {
+  function SeatShape(
+    this: { shape: typeof shape; body: typeof body },
+    opts: unknown,
+  ) {
     createdWith.push(opts);
     this.shape = shape;
+    this.body = body;
   }
 
-  return { SeatShape, shape, circle, createdWith };
+  return { SeatShape, shape, body, createdWith };
 });
 
 vi.mock('./shapes/seatShape', () => ({ default: SeatShape }));
@@ -44,7 +47,6 @@ describe('EventSeat', () => {
     createdWith.length = 0;
     shape.on.mockReturnValue(shape);
     shape.setAttr.mockReturnValue(shape);
-    shape.findOne.mockReturnValue(circle);
   });
 
   it('creates a seat shape with available styling', () => {
@@ -59,6 +61,7 @@ describe('EventSeat', () => {
       fillColor: DEFAULTS.seatColor,
       unavailable: false,
       unavailableColor: DEFAULTS.unavailableColor,
+      seatSvg: undefined,
     });
     expect(shape.setAttr).toHaveBeenCalledWith('seat', expect.any(EventSeat));
   });
@@ -85,7 +88,7 @@ describe('EventSeat', () => {
 
     expect(seat.name()).toBe('selected');
     expect(seat.color()).toBe(DEFAULTS.selectedColor);
-    expect(circle.fill).toHaveBeenCalledWith(DEFAULTS.selectedColor);
+    expect(body.fill).toHaveBeenCalledWith(DEFAULTS.selectedColor);
     expect(shape.name).toHaveBeenCalledWith('selected');
   });
 
@@ -102,21 +105,33 @@ describe('EventSeat', () => {
 
     expect(booked.name()).toBe('unselected');
     expect(unavailable.name()).toBe('unselected');
-    expect(circle.fill).not.toHaveBeenCalled();
+    expect(body.fill).not.toHaveBeenCalled();
   });
 
   it('deselects a selected seat', () => {
     const seat = new EventSeat({ ...baseOpts, id: 'A1' });
     seat.select();
-    circle.fill.mockClear();
+    body.fill.mockClear();
     shape.name.mockClear();
 
     seat.deselect();
 
     expect(seat.name()).toBe('unselected');
     expect(seat.color()).toBe(DEFAULTS.seatColor);
-    expect(circle.fill).toHaveBeenCalledWith(DEFAULTS.seatColor);
+    expect(body.fill).toHaveBeenCalledWith(DEFAULTS.seatColor);
     expect(shape.name).toHaveBeenCalledWith('unselected');
+  });
+
+  it('passes seatSvg through when configured', () => {
+    new EventSeat({
+      ...baseOpts,
+      id: 'A1',
+      seatSvg: 'M0 0 H10 V10 Z',
+    });
+
+    expect(createdWith[0]).toMatchObject({
+      seatSvg: 'M0 0 H10 V10 Z',
+    });
   });
 
   it('sets cursor style from hover handlers', () => {

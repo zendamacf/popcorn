@@ -27,6 +27,8 @@ const popcorn = new window.Popcorn({
     rowWidth: 12,  // Maximum number of seats per row
     maxSeats: 2,  // Maximum number of seats to select
     seatList: seats,
+    // Optional: SVG path `d` data instead of circles
+    seatSvg: 'M28 10 H72 A8 8 0 0 1 80 18 V37 A8 8 0 0 1 72 45 H28 A8 8 0 0 1 20 37 V18 A8 8 0 0 1 28 10 Z M27 40 H73 A12 12 0 0 1 85 52 V78 A12 12 0 0 1 73 90 H27 A12 12 0 0 1 15 78 V52 A12 12 0 0 1 27 40 Z',
 });
 ```
 

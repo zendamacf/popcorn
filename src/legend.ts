@@ -49,6 +49,7 @@ class Legend {
       fillColor,
       unavailable,
       unavailableColor: this.opts.unavailableColor,
+      seatSvg: this.opts.seatSvg,
     });
 
     const label = new KText({
