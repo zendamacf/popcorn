@@ -27,8 +27,8 @@ function injectReleaseScript(): Plugin {
       order: 'post',
       handler(html) {
         return html.replace(
-          '</head>',
-          `  <script src="${demoReleaseDownloadUrl}"></script>\n</head>`,
+          /<head([^>]*)>/i,
+          `<head$1>\n  <script src="${demoReleaseDownloadUrl}"></script>`,
         );
       },
     },
@@ -45,6 +45,7 @@ export default defineConfig({
   define: {
     __DEMO_VERSION__: JSON.stringify(demoVersion),
     __DEMO_RELEASE_TAG_URL__: JSON.stringify(demoReleaseTagUrl),
+    __DEMO_USE_RELEASE__: true,
   },
   build: {
     outDir: '../docs',

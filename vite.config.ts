@@ -1,11 +1,7 @@
 import { readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
-import {
-  demoReleaseDownloadUrl,
-  demoReleaseTagUrl,
-  demoVersion,
-} from './scripts/demo-version';
+import { demoReleaseTagUrl, demoVersion } from './scripts/demo-version';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
@@ -33,6 +29,7 @@ export default defineConfig({
   define: {
     __DEMO_VERSION__: JSON.stringify(demoVersion),
     __DEMO_RELEASE_TAG_URL__: JSON.stringify(demoReleaseTagUrl),
+    __DEMO_USE_RELEASE__: false,
   },
   server: {
     open: process.env.CI ? false : '/demo/',
