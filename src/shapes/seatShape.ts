@@ -1,5 +1,6 @@
 import { Group } from 'konva/lib/Group';
 import { Circle } from 'konva/lib/shapes/Circle';
+import { Line } from 'konva/lib/shapes/Line';
 
 export type SeatShapeOptions = {
   id?: string;
@@ -8,6 +9,8 @@ export type SeatShapeOptions = {
   name?: string;
   seatWidth: number;
   fillColor?: string;
+  unavailable?: boolean;
+  unavailableColor?: string;
 };
 
 class SeatShape {
@@ -28,8 +31,22 @@ class SeatShape {
     const circle = new Circle({
       radius: radius,
       fill: opts.fillColor,
+      opacity: opts.unavailable ? 0.4 : 1,
     });
     shape.add(circle);
+
+    if (opts.unavailable) {
+      const lineEnd = radius / 2;
+      const line1 = new Line({
+        points: [-lineEnd, -lineEnd, 0, 0, lineEnd, lineEnd],
+        stroke: opts.unavailableColor,
+      });
+      const line2 = new Line({
+        points: [-lineEnd, lineEnd, 0, 0, lineEnd, -lineEnd],
+        stroke: opts.unavailableColor,
+      });
+      shape.add(line1).add(line2);
+    }
 
     this.shape = shape;
   }

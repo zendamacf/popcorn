@@ -7,6 +7,8 @@ type PopcornDefaults = {
   bookedColor: string;
   /** Fill color for selected seats */
   selectedColor: string;
+  /** Stroke color for the X on unavailable seats */
+  unavailableColor: string;
   /** Width of the seat shape in pixels */
   seatWidth: number;
   /** Margin between seat shapes in pixels */
@@ -43,7 +45,9 @@ type PopcornEvent =
   | 'popcorn.maxseats';
 
 interface Window {
-  Popcorn: new (options: PopcornInitOptions) => {
+  Popcorn: new (
+    options: PopcornInitOptions,
+  ) => {
     on(eventName: string, eventHandler: (event: Event) => void): void;
     redraw(): void;
     destroy(): void;

@@ -1,12 +1,6 @@
 import { Group } from 'konva/lib/Group';
 import { Text as KText } from 'konva/lib/shapes/Text';
-import {
-  AvailableSeat,
-  BookedSeat,
-  type SeatType,
-  SelectedSeat,
-  UnavailableSeat,
-} from './shapes';
+import SeatShape from './shapes/seatShape';
 
 class Legend {
   public shape: Group;
@@ -35,39 +29,26 @@ class Legend {
       preventDefault: false,
     });
 
-    this.populateAvailable();
-    this.populateUnavailable();
-    this.populateBooked();
-    this.populateSelected();
+    this.populateEntry('Available', this.opts.seatColor, 0);
+    this.populateEntry('Unavailable', this.opts.seatColor, 1, true);
+    this.populateEntry('Booked', this.opts.bookedColor, 2);
+    this.populateEntry('Selected', this.opts.selectedColor, 3);
   }
 
-  private populateAvailable(): void {
-    this.populateEntry(AvailableSeat, 'Available', 0);
-  }
-
-  private populateUnavailable(): void {
-    this.populateEntry(UnavailableSeat, 'Unavailable', 1);
-  }
-
-  private populateBooked(): void {
-    this.populateEntry(BookedSeat, 'Booked', 2);
-  }
-
-  private populateSelected(): void {
-    this.populateEntry(SelectedSeat, 'Selected', 3);
-  }
-
-  private populateEntry<T extends SeatType>(
-    entryClass: T,
+  private populateEntry(
     labelText: string,
+    fillColor: string,
     index: number,
+    unavailable = false,
   ): void {
-    // Figure out starting x for this entry
     const xStart = this.entryWidth * index;
 
-    const seat = new entryClass({
+    const seat = new SeatShape({
       x: xStart + this.entryPadding,
-      ...this.opts,
+      seatWidth: this.opts.seatWidth,
+      fillColor,
+      unavailable,
+      unavailableColor: this.opts.unavailableColor,
     });
 
     const label = new KText({

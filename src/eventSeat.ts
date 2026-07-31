@@ -1,10 +1,6 @@
 import type { KonvaEventObject } from 'konva/lib/Node';
 import type { Circle } from 'konva/lib/shapes/Circle';
-import type { SeatType } from './shapes';
-import AvailableSeat from './shapes/availableSeat';
-import BookedSeat from './shapes/bookedSeat';
-import type SeatShape from './shapes/seatShape';
-import UnavailableSeat from './shapes/unavailableSeat';
+import SeatShape from './shapes/seatShape';
 
 class EventSeat {
   private id?: string;
@@ -32,24 +28,18 @@ class EventSeat {
     this.isSelected = false;
     this.opts = opts;
 
-    const shape = this.shapeClass();
-
-    this.seatShape = new shape({
+    this.seatShape = new SeatShape({
       id: this.id,
       x: this.x,
       y: this.y,
       name: this.name(),
-      ...opts,
+      seatWidth: this.opts.seatWidth,
+      fillColor: this.color(),
+      unavailable: this.unavailable,
+      unavailableColor: this.opts.unavailableColor,
     });
 
     this.bindEvents();
-  }
-
-  private shapeClass(): SeatType {
-    // if (this.isSelected) return this.opts.selectedColor;
-    if (this.booked) return BookedSeat;
-    if (this.unavailable) return UnavailableSeat;
-    return AvailableSeat;
   }
 
   private bindEvents(): void {
