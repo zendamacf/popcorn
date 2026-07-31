@@ -31,14 +31,20 @@ type PopcornOptions = PopcornDefaults & {
   backgroundColor?: string;
 };
 
+/** Constructor input; defaults are filled in from DEFAULTS. */
+type PopcornInitOptions = Partial<PopcornDefaults> &
+  Omit<PopcornOptions, keyof PopcornDefaults> & {
+    backgroundColor?: string;
+  };
+
 type PopcornEvent =
   | 'popcorn.selectseat'
   | 'popcorn.deselectseat'
   | 'popcorn.maxseats';
 
 interface Window {
-  Popcorn: new (options: PopcornOptions) => {
-    on(eventName: string, eventHandler: () => void): void;
+  Popcorn: new (options: PopcornInitOptions) => {
+    on(eventName: string, eventHandler: (event: Event) => void): void;
     redraw(): void;
     destroy(): void;
     selected: string[];

@@ -4,7 +4,7 @@
 
 ## CDN
 
-Currently just hosted on GitHub [here](https://raw.githubusercontent.com/zendamacf/popcorn/master/dist/popcorn.min.js).
+Currently just hosted on GitHub [here](https://github.com/zendamacf/popcorn/releases).
 
 ## Get Started
 

@@ -16,7 +16,7 @@ class Popcorn {
   private seatWidth: number;
   private centeringOffset: number;
 
-  constructor(options: PopcornOptions) {
+  constructor(options: PopcornInitOptions) {
     this.opts = { ...DEFAULTS, ...options };
     if (!this.opts.seatList) throw 'No seatlist provided.';
 
@@ -247,7 +247,7 @@ class Popcorn {
    * @param {string} eventName Name of the event.
    * @param {function} eventHandler A callback function.
    */
-  public on(eventName: string, eventHandler: () => void) {
+  public on(eventName: string, eventHandler: (event: Event) => void) {
     this.elem.addEventListener(eventName, eventHandler);
   }
 
@@ -297,3 +297,5 @@ class Popcorn {
 
 // Assign to window for use in standard browser
 window.Popcorn = Popcorn;
+
+export default Popcorn;
