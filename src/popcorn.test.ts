@@ -229,6 +229,52 @@ describe('Popcorn', () => {
     ).toThrow('Popcorn: rowWidth must be >= 1');
   });
 
+  it('throws on other invalid constructor options', () => {
+    const elem = document.createElement('div');
+    elem.id = 'seats';
+    document.body.appendChild(elem);
+
+    const base = {
+      elem: '#seats',
+      width: 100,
+      height: 100,
+      rowWidth: 4,
+      maxSeats: 2,
+      seatList: [{ id: 'A1' }],
+    };
+
+    expect(() => new Popcorn({ ...base, maxSeats: 0 })).toThrow(
+      'Popcorn: maxSeats must be >= 1',
+    );
+    expect(() => new Popcorn({ ...base, width: 0 })).toThrow(
+      'Popcorn: width must be > 0',
+    );
+    expect(() => new Popcorn({ ...base, height: -1 })).toThrow(
+      'Popcorn: height must be > 0',
+    );
+    expect(() => new Popcorn({ ...base, seatWidth: 0 })).toThrow(
+      'Popcorn: seatWidth must be > 0',
+    );
+  });
+
+  it('throws when seatList contains duplicate ids', () => {
+    const elem = document.createElement('div');
+    elem.id = 'seats';
+    document.body.appendChild(elem);
+
+    expect(
+      () =>
+        new Popcorn({
+          elem: '#seats',
+          width: 100,
+          height: 100,
+          rowWidth: 4,
+          maxSeats: 2,
+          seatList: [{ id: 'A1' }, { id: 'A1' }],
+        }),
+    ).toThrow('Popcorn: seatList contains duplicate ids.');
+  });
+
   it('builds seats for entries with ids and skips empty placeholders', () => {
     mount();
 
@@ -383,6 +429,31 @@ describe('Popcorn', () => {
     );
   });
 
+  it('replaces an existing selection when setting selected', () => {
+    const { popcorn } = mount({
+      maxSeats: 2,
+      seatList: [{ id: 'A1' }, { id: 'A3' }],
+    });
+    const a1 = nodesById.get('A1')?.getAttr('seat') as {
+      select: ReturnType<typeof vi.fn>;
+      deselect: ReturnType<typeof vi.fn>;
+    };
+    const a3 = nodesById.get('A3')?.getAttr('seat') as {
+      select: ReturnType<typeof vi.fn>;
+      deselect: ReturnType<typeof vi.fn>;
+    };
+
+    popcorn.selected = ['A1'];
+    a1.deselect.mockClear();
+    a3.select.mockClear();
+
+    popcorn.selected = ['A3'];
+
+    expect(a1.deselect).toHaveBeenCalled();
+    expect(a3.select).toHaveBeenCalled();
+    expect(popcorn.selected).toEqual(['A3']);
+  });
+
   it('rejects unknown or unselectable ids when setting selected', () => {
     const { popcorn } = mount();
 
@@ -393,5 +464,17 @@ describe('Popcorn', () => {
     expect(() => {
       popcorn.selected = ['A2'];
     }).toThrow('is not selectable');
+  });
+
+  it('rejects setting more seats than maxSeats', () => {
+    const { popcorn } = mount({
+      maxSeats: 1,
+      seatList: [{ id: 'A1' }, { id: 'A3' }],
+    });
+
+    expect(() => {
+      popcorn.selected = ['A1', 'A3'];
+    }).toThrow('selection exceeds maxSeats (1)');
+    expect(popcorn.selected).toEqual(['A1']);
   });
 });
