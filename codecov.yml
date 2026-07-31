@@ -1,0 +1,11 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+    patch:
+      default:
+        # Allow PRs that leave some changed lines uncovered (Codecov default is 100%).
+        target: 70%
+        threshold: 5%
