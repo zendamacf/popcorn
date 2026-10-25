@@ -19,7 +19,7 @@
   "author": "Zach Lang <zach.d.lang@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "konva": "^10.5.0"
+    "konva": "^10.7.0"
   },
   "scripts": {
     "dev": "vite",
