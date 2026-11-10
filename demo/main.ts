@@ -167,14 +167,14 @@ function bindColorPair(pickerId: string, textId: string) {
 
 function attachEventHandlers(instance: PopcornInstance) {
   instance.on('popcorn.selectseat', (e: Event) => {
-    const detail = (e as CustomEvent).detail as { id: string; total: number };
-    logEvent(`Selected ${detail.id} (${detail.total} total)`, 'event-select');
+    const detail = (e as CustomEvent).detail as { seatid: string; total: number };
+    logEvent(`Selected ${detail.seatid} (${detail.total} total)`, 'event-select');
     updateSelectedDisplay(instance.selected);
   });
 
   instance.on('popcorn.deselectseat', (e: Event) => {
-    const detail = (e as CustomEvent).detail as { id: string; total: number };
-    logEvent(`Deselected ${detail.id} (${detail.total} total)`, 'event-deselect');
+    const detail = (e as CustomEvent).detail as { seatid: string; total: number };
+    logEvent(`Deselected ${detail.seatid} (${detail.total} total)`, 'event-deselect');
     updateSelectedDisplay(instance.selected);
   });
 

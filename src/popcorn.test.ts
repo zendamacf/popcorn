@@ -475,6 +475,19 @@ describe('Popcorn', () => {
     expect(() => {
       popcorn.selected = ['A1', 'A3'];
     }).toThrow('selection exceeds maxSeats (1)');
+    expect(popcorn.selected).toEqual([]);
+  });
+
+  it('keeps the existing selection when setting selected fails', () => {
+    const { popcorn } = mount({
+      maxSeats: 2,
+      seatList: [{ id: 'A1' }, { id: 'A3' }, { id: 'A4', booked: true }],
+    });
+    popcorn.selected = ['A1'];
+
+    expect(() => {
+      popcorn.selected = ['A3', 'A4'];
+    }).toThrow('is not selectable');
     expect(popcorn.selected).toEqual(['A1']);
   });
 });
