@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Setting `selected` now checks all ids first. If one id is not valid, the selection does not change.
+- README and demo now use `seatid` (not `id`) in seat event data.
+
 ## [1.0.0] - 2026-08-01
 
 ### Changed

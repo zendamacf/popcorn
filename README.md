@@ -42,8 +42,8 @@ The callback function will receive an event object with the `detail` property po
 
 There are 3 types of events available:
 
-* `popcorn.selectseat`: Triggered when selecting a seat. _Event data contains seat label (`id`) & total count of selected seats (`total`)_.
-* `popcorn.deselectseat`: Triggering when deselecting a seat. _Event data contains seat label (`id`) & total count of selected seats (`total`)_.
+* `popcorn.selectseat`: Triggered when selecting a seat. _Event data contains seat label (`seatid`) & total count of selected seats (`total`)_.
+* `popcorn.deselectseat`: Triggered when deselecting a seat. _Event data contains seat label (`seatid`) & total count of selected seats (`total`)_.
 * `popcorn.maxseats`: Triggered when clicking on a seat, but the maximum number of seats has already been reached. _Event data contains total count of selected seats (`total`)_.
 
 ## Additional Properties & Methods
@@ -53,6 +53,8 @@ There are 3 types of events available:
 popcorn.selected;
 
 // Set the selected seats
+// Throws if an id is unknown, booked, unavailable or over `maxSeats`.
+// When it throws, the current selection does not change.
 popcorn.selected = ['A1', 'A2', 'A3'];
 
 // Destroy this popcorn instance

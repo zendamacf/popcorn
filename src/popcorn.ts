@@ -344,11 +344,7 @@ class Popcorn {
   public set selected(seats: string[]) {
     if (this.destroyed) return;
 
-    for (const id of this.selectedIds) {
-      this.seatsById.get(id)?.deselect();
-    }
-    this.selectedIds.clear();
-
+    const next = new Set<string>();
     for (const id of seats) {
       const seat = this.seatsById.get(id);
       if (!seat) {
@@ -357,12 +353,21 @@ class Popcorn {
       if (seat.booked || seat.unavailable) {
         throw new Error(`Popcorn: seat "${id}" is not selectable`);
       }
-      if (this.selectedIds.size >= this.opts.maxSeats) {
+      next.add(id);
+      if (next.size > this.opts.maxSeats) {
         throw new Error(
           `Popcorn: selection exceeds maxSeats (${this.opts.maxSeats})`,
         );
       }
-      seat.select();
+    }
+
+    for (const id of this.selectedIds) {
+      this.seatsById.get(id)?.deselect();
+    }
+    this.selectedIds.clear();
+
+    for (const id of next) {
+      this.seatsById.get(id)?.select();
       this.selectedIds.add(id);
     }
     this.redraw();
